@@ -1,0 +1,81 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: docmind-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      DATABASE_URL: postgresql://docmind:docmind@postgres:5432/docmind
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+      - backend_cache:/root/.cache
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: docmind-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: docmind
+      POSTGRES_PASSWORD: docmind
+      POSTGRES_DB: docmind
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docmind -d docmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: docmind-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Frontend — dev stub only (not built in Phase 1 focus)
+  # frontend:
+  #   profiles: ["frontend"]
+  #   ...
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_cache:
