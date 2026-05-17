@@ -3,8 +3,13 @@
 ## Phase 1 Status: ✅ **COMPLETED** (May 2026)
 
 Implemented: Auth, Document Upload, Ingestion (parse/chunk/embed), RAG Chat, hybrid search, Docker stack, **9/9 pytest**.  
-**Phase 2:** Multi-tenant, frontend, Temporal — in progress.  
-See [../PHASE1_COMPLETION.md](../PHASE1_COMPLETION.md) for the full report.
+**Phase 2:** Multi-tenant, frontend, Temporal — in progress.
+
+| Document | Description |
+|----------|-------------|
+| [../ARCHITECTURAL_PASSPORT.md](../ARCHITECTURAL_PASSPORT.md) | Архітектурний паспорт проекту |
+| [../DEVELOPER_PASSPORT.md](../DEVELOPER_PASSPORT.md) | **Паспорт розробника** |
+| [../PHASE1_COMPLETION.md](../PHASE1_COMPLETION.md) | Phase 1 completion report |
 
 | Doc | Topic |
 |-----|-------|

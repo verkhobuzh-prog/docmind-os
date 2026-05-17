@@ -94,6 +94,8 @@ pytest -v
 
 ## Documentation
 
+- [**Architectural Passport**](docs/ARCHITECTURAL_PASSPORT.md) — архітектурний паспорт
+- [Developer Passport](docs/DEVELOPER_PASSPORT.md) — онбординг розробника
 - [Phase 1 Completion Report](docs/PHASE1_COMPLETION.md)
 - [Platform Architecture](docs/architecture/README.md)
 - [CHANGELOG](CHANGELOG.md)
