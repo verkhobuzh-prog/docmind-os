@@ -7,6 +7,8 @@ from fastapi import HTTPException, UploadFile, status
 
 from app.core.config import settings
 from app.db.supabase import get_signed_url, get_supabase, run_supabase, upload_file
+from app.services.document_enrichment import enrich_document_after_upload
+from app.utils.categorization import is_rag_ingestible
 from app.schemas.document import (
     DocumentListResponse,
     DocumentResponse,
@@ -22,6 +24,8 @@ ALLOWED_MIME_PREFIXES = (
     "application/json",
     "text/",
     "image/",
+    "video/",
+    "audio/",
 )
 
 
@@ -42,6 +46,8 @@ def _row_to_response(row: dict) -> DocumentResponse:
         mime_type=row.get("mime_type"),
         size_bytes=int(row.get("size_bytes", 0)),
         status=row.get("status", "uploaded"),
+        subject=row.get("subject"),
+        document_type=row.get("document_type"),
         metadata=row.get("metadata") or {},
         created_at=row["created_at"],
         updated_at=row["updated_at"],
@@ -115,7 +121,32 @@ class DocumentService:
             return client.table(TABLE_NAME).insert(row).execute()
 
         result = await run_supabase(_insert)
-        document = _row_to_response(result.data[0])
+        inserted = result.data[0]
+
+        enrichment = await enrich_document_after_upload(
+            document_id=document_id,
+            user_id=user_id,
+            content=content,
+            filename=filename,
+            mime_type=mime_type,
+            title=title,
+        )
+        inserted["subject"] = enrichment["subject"]
+        inserted["document_type"] = enrichment["document_type"]
+        inserted.setdefault("metadata", {})
+        if isinstance(inserted["metadata"], dict):
+            inserted["metadata"].update(
+                {
+                    "is_duplicate": enrichment["is_duplicate"],
+                    "duplicate_of": enrichment.get("duplicate_of"),
+                    "media": enrichment.get("media"),
+                }
+            )
+
+        if not is_rag_ingestible(mime_type):
+            await self._mark_media_catalogued(document_id, user_id)
+
+        document = _row_to_response(inserted)
 
         signed_url: str | None = None
         try:
@@ -123,11 +154,35 @@ class DocumentService:
         except Exception:
             signed_url = None
 
+        msg = "Document uploaded successfully"
+        if enrichment.get("is_duplicate"):
+            msg = "Document uploaded (marked as duplicate)"
+        if not is_rag_ingestible(mime_type):
+            msg = "Media uploaded (catalogued; text search not applied)"
+
         return DocumentUploadResponse(
             document=document,
             signed_url=signed_url or None,
-            message="Document uploaded successfully",
+            message=msg,
         )
+
+    async def should_auto_ingest(self, mime_type: str) -> bool:
+        return is_rag_ingestible(mime_type)
+
+    async def _mark_media_catalogued(self, document_id: UUID, user_id: str) -> None:
+        client = get_supabase()
+        now = datetime.now(timezone.utc).isoformat()
+
+        def _upd():
+            return (
+                client.table(TABLE_NAME)
+                .update({"status": "indexed", "updated_at": now})
+                .eq("id", str(document_id))
+                .eq("user_id", user_id)
+                .execute()
+            )
+
+        await run_supabase(_upd)
 
     async def list_by_user(self, user_id: str) -> DocumentListResponse:
         if not settings.supabase_configured:

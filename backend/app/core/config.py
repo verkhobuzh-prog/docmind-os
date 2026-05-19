@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: RedisDsn | str = "redis://localhost:6379/0"
 
+    # Graph DB
+    GRAPH_DB_URL: str = "redis://localhost:6380"
+    GRAPH_DB_NAME: str = "docmind_knowledge"
+    GRAPH_DB_ENABLED: bool = False
+
     # CORS
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
@@ -53,6 +58,14 @@ class Settings(BaseSettings):
     INGESTION_CHUNK_OVERLAP: int = Field(default=64, ge=0, le=512)
     INGESTION_AUTO_START: bool = True
 
+    # Ingestion 2.0
+    TRIPLE_EXTRACTION_ENABLED: bool = False
+    TRIPLE_EXTRACTION_MODEL: str = "gpt-4o-mini"
+    CONFIDENCE_THRESHOLD: float = 0.6
+
+    # Provenance
+    PROVENANCE_ENABLED: bool = True
+
     # RAG / Chat
     RAG_TOP_K: int = Field(default=8, ge=1, le=20)
     RAG_VECTOR_WEIGHT: float = Field(default=0.7, ge=0.0, le=1.0)
@@ -60,6 +73,11 @@ class Settings(BaseSettings):
 
     # Rate limiting
     RATE_LIMIT_PER_MINUTE: int = Field(default=60, ge=1)
+
+    # Personal pilot
+    PILOT_INVITE_REQUIRED: bool = True
+    PILOT_ADMIN_EMAILS: str = ""
+    FRONTEND_URL: str = "http://localhost:5173"
 
     @property
     def cors_origins_list(self) -> list[str]:
@@ -74,6 +92,10 @@ class Settings(BaseSettings):
         return bool(self.REDIS_URL)
 
     @property
+    def graph_configured(self) -> bool:
+        return self.GRAPH_DB_ENABLED and bool(self.GRAPH_DB_URL)
+
+    @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
 
@@ -85,6 +107,10 @@ class Settings(BaseSettings):
     def auth_disabled(self) -> bool:
         """Dev/test only — never enable in production."""
         return self.AUTH_DISABLED and self.ENVIRONMENT == "development"
+
+    @property
+    def pilot_admin_emails(self) -> set[str]:
+        return {e.strip().lower() for e in self.PILOT_ADMIN_EMAILS.split(",") if e.strip()}
 
 
 @lru_cache

@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.db import close_redis, close_supabase, init_redis, init_supabase, ping_redis, ping_supabase
+from app.db.graph import close_graph, init_graph, ping_graph
 from app.db.postgres import close_postgres, init_postgres
 from app.middleware.request_context import RequestContextMiddleware
 
@@ -18,7 +19,9 @@ async def lifespan(app: FastAPI):
     init_supabase()
     await init_redis()
     await init_postgres()
+    await init_graph()
     yield
+    await close_graph()
     await close_redis()
     await close_postgres()
     close_supabase()
@@ -37,13 +40,13 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
 
     app.add_middleware(RequestContextMiddleware)
+    origins = list(settings.cors_origins_list)
+    if settings.FRONTEND_URL and settings.FRONTEND_URL not in origins:
+        origins.append(settings.FRONTEND_URL.rstrip("/"))
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "https://your-production-domain.com",  # замінити при deploy
-        ],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -54,6 +57,7 @@ def create_app() -> FastAPI:
     async def health_check():
         supabase_ok = await ping_supabase()
         redis_ok = await ping_redis()
+        graph_ok = await ping_graph()
         health_status = "ok" if (supabase_ok or not settings.supabase_configured) else "degraded"
         return {
             "status": health_status,
@@ -63,6 +67,7 @@ def create_app() -> FastAPI:
             "checks": {
                 "supabase": supabase_ok if settings.supabase_configured else "not_configured",
                 "redis": redis_ok if settings.redis_configured else "not_configured",
+                "graph": graph_ok if settings.graph_configured else "not_configured",
             },
         }
 

@@ -25,6 +25,8 @@ class DocumentResponse(DocumentBase):
     mime_type: Optional[str] = None
     size_bytes: int = Field(..., ge=0)
     status: str = "uploaded"
+    subject: Optional[str] = None
+    document_type: Optional[str] = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
     updated_at: datetime

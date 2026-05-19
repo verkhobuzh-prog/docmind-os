@@ -37,7 +37,9 @@ async def upload_document(
         except ValueError:
             pass
     result = await service.upload_document(file, current_user, org_id=effective_org)
-    if settings.INGESTION_AUTO_START:
+    if settings.INGESTION_AUTO_START and await service.should_auto_ingest(
+        result.document.mime_type or ""
+    ):
         ingestion = get_ingestion_service()
         background_tasks.add_task(
             ingestion.start_ingestion,

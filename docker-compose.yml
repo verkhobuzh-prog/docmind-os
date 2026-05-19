@@ -23,6 +23,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      falkordb:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -70,6 +72,20 @@ services:
       timeout: 3s
       retries: 5
 
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: docmind-falkordb
+    ports:
+      - "6380:6379"
+    volumes:
+      - falkordb_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build:
       context: ./frontend
@@ -94,4 +110,5 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  falkordb_data:
   backend_cache:

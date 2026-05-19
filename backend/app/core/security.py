@@ -99,6 +99,21 @@ async def get_current_org(
     return str(org_id) if org_id else None
 
 
+async def get_admin_user(
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+) -> dict[str, Any]:
+    """Pilot admin — email must be listed in PILOT_ADMIN_EMAILS."""
+    email = (current_user.get("email") or "").lower()
+    if settings.auth_disabled and email == "dev@docmind.local":
+        return current_user
+    if email not in settings.pilot_admin_emails:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
+
+
 async def get_current_user_optional(
     credentials: Annotated[
         Optional[HTTPAuthorizationCredentials], Depends(security_scheme)

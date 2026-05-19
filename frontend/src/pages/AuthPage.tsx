@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { FileText, Mail, Lock, User, ArrowRight, Loader2, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -12,7 +13,16 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
+  const [inviteRequired, setInviteRequired] = useState(true)
   const { signIn, signUp, isLoading } = useAuthStore()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const fromUrl = params.get('invite')
+    if (fromUrl) setInviteCode(fromUrl.toUpperCase())
+    api.config.pilot().then((c) => setInviteRequired(c.invite_required)).catch(() => {})
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,8 +31,23 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
         await signIn(email, password)
         toast.success('Ласкаво просимо!')
       } else {
+        if (inviteRequired && !inviteCode.trim()) {
+          toast.error('Потрібен код запрошення')
+          return
+        }
+        if (inviteCode.trim()) {
+          const v = await api.invites.validate(inviteCode.trim())
+          if (!v.valid) {
+            toast.error(v.message || 'Невірний код')
+            return
+          }
+        }
         await signUp(email, password, name)
-        toast.success('Акаунт створено! Перевірте email.')
+        const token = useAuthStore.getState().token
+        if (token && inviteCode.trim()) {
+          await api.invites.claim(inviteCode.trim(), name)
+        }
+        toast.success('Акаунт створено!')
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Помилка авторизації'
@@ -50,6 +75,22 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === 'register' && inviteRequired && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Код запрошення
+                </label>
+                <input
+                  className="input font-mono uppercase"
+                  type="text"
+                  placeholder="DM-XXXXXXXXXX"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
             {mode === 'register' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">

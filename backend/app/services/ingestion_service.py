@@ -69,14 +69,45 @@ class IngestionService:
             embeddings = await embed_texts(chunks)
             embeddings_count = sum(1 for e in embeddings if e is not None)
 
-            await self._delete_existing_chunks(document_id)
-            await self._insert_chunks(
+            chunk_rows = self._build_chunk_rows(
                 document_id=document_id,
                 chunks=chunks,
-                embeddings=embeddings,
                 parser=parsed.parser,
                 doc_metadata=parsed.metadata,
             )
+
+            # Triple Extraction (Ingestion 2.0)
+            try:
+                if settings.TRIPLE_EXTRACTION_ENABLED:
+                    from app.services.graph_service import GraphService
+                    from app.utils.triple_extractor import TripleExtractor
+
+                    extractor = TripleExtractor()
+                    graph_svc = GraphService()
+
+                    for chunk in chunk_rows:
+                        triples = await extractor.extract(
+                            chunk_text=chunk["content"],
+                            doc_id=str(document_id),
+                            chunk_id=str(chunk["id"]),
+                            page_num=chunk.get("metadata", {}).get("page_num"),
+                        )
+                        if triples:
+                            await graph_svc.upsert_triples(triples, doc_id=str(document_id))
+                            logger.info(
+                                "Extracted %d triples from chunk %s",
+                                len(triples),
+                                chunk["id"],
+                            )
+            except Exception as exc:
+                logger.warning(
+                    "Triple extraction / graph upsert failed for document %s: %s",
+                    document_id,
+                    exc,
+                )
+
+            await self._delete_existing_chunks(document_id)
+            await self._insert_chunk_rows(chunk_rows, embeddings=embeddings)
 
             await self._update_document_status(
                 document_id,
@@ -193,18 +224,15 @@ class IngestionService:
 
         await run_supabase(_delete)
 
-    async def _insert_chunks(
+    def _build_chunk_rows(
         self,
         *,
         document_id: UUID,
         chunks: list[str],
-        embeddings: list[list[float] | None],
         parser: str,
         doc_metadata: dict,
-    ) -> None:
-        client = get_supabase()
-        rows = []
-
+    ) -> list[dict]:
+        rows: list[dict] = []
         for i, content in enumerate(chunks):
             meta = ChunkMetadata(
                 chunk_index=i,
@@ -213,16 +241,30 @@ class IngestionService:
                 source=doc_metadata.get("format"),
                 extra={"document_metadata": doc_metadata},
             )
-            row: dict = {
-                "id": str(uuid4()),
-                "document_id": str(document_id),
-                "chunk_index": i,
-                "content": content,
-                "metadata": meta.model_dump(exclude_none=True),
-            }
+            metadata = meta.model_dump(exclude_none=True)
+            if meta.page is not None:
+                metadata["page_num"] = meta.page
+            rows.append(
+                {
+                    "id": str(uuid4()),
+                    "document_id": str(document_id),
+                    "chunk_index": i,
+                    "content": content,
+                    "metadata": metadata,
+                }
+            )
+        return rows
+
+    async def _insert_chunk_rows(
+        self,
+        rows: list[dict],
+        *,
+        embeddings: list[list[float] | None],
+    ) -> None:
+        client = get_supabase()
+        for i, row in enumerate(rows):
             if i < len(embeddings) and embeddings[i] is not None:
                 row["embedding"] = embeddings[i]
-            rows.append(row)
 
         def _insert():
             return client.table(CHUNKS_TABLE).insert(rows).execute()

@@ -68,8 +68,15 @@ export function DocumentsPage() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'application/pdf': ['.pdf'], 'text/plain': ['.txt'], 'text/markdown': ['.md'],
-              'application/vnd.ms-excel': ['.xls'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] },
+    accept: {
+      'application/pdf': ['.pdf'],
+      'text/plain': ['.txt'],
+      'text/markdown': ['.md'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.gif'],
+      'video/*': ['.mp4', '.mov', '.webm'],
+    },
     maxSize: 50 * 1024 * 1024,
   })
 
@@ -108,7 +115,7 @@ export function DocumentsPage() {
             <p className="font-medium text-gray-900 dark:text-white text-sm">
               {uploading ? 'Завантаження...' : isDragActive ? 'Відпустіть файли' : 'Перетягніть файли сюди'}
             </p>
-            <p className="text-xs text-gray-400 mt-1">PDF, TXT, MD, XLSX — до 50MB</p>
+            <p className="text-xs text-gray-400 mt-1">PDF, TXT, MD, XLSX, фото, відео — до 50MB</p>
           </div>
           {!uploading && (
             <button type="button" className="btn-primary text-xs px-3 py-1.5">
@@ -142,6 +149,7 @@ export function DocumentsPage() {
             <thead>
               <tr className="border-b border-surface-1 dark:border-surface-dark-3">
                 <th className="text-left text-xs font-medium text-gray-400 px-5 py-3">Документ</th>
+                <th className="text-left text-xs font-medium text-gray-400 px-5 py-3 hidden lg:table-cell">Категорія</th>
                 <th className="text-left text-xs font-medium text-gray-400 px-5 py-3 hidden md:table-cell">Розмір</th>
                 <th className="text-left text-xs font-medium text-gray-400 px-5 py-3 hidden md:table-cell">Дата</th>
                 <th className="text-left text-xs font-medium text-gray-400 px-5 py-3">Статус</th>
@@ -160,6 +168,17 @@ export function DocumentsPage() {
                         <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
                           {doc.filename}
                         </span>
+                        {Boolean(doc.metadata?.is_duplicate) && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                            дублікат
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 hidden lg:table-cell">
+                      <div className="text-xs text-gray-500">
+                        <div>{doc.subject || '—'}</div>
+                        <div className="text-gray-400">{doc.document_type || '—'}</div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">

@@ -190,14 +190,22 @@ def sample_chunks():
 
 # ---------- Legacy API test fixtures ----------
 @pytest.fixture(autouse=True)
+def pilot_settings(monkeypatch):
+    monkeypatch.setattr("app.core.config.settings.PILOT_INVITE_REQUIRED", False)
+
+
+@pytest.fixture(autouse=True)
 def disable_external_startup(monkeypatch):
     """Prevent tests from connecting to real Supabase/Redis/Postgres on startup."""
     monkeypatch.setattr(main_module, "init_supabase", lambda: None)
     monkeypatch.setattr(main_module, "init_redis", AsyncMock())
     monkeypatch.setattr(main_module, "init_postgres", AsyncMock())
+    monkeypatch.setattr(main_module, "init_graph", AsyncMock())
     monkeypatch.setattr(main_module, "ping_supabase", AsyncMock(return_value=False))
     monkeypatch.setattr(main_module, "ping_redis", AsyncMock(return_value=False))
+    monkeypatch.setattr(main_module, "ping_graph", AsyncMock(return_value=False))
     monkeypatch.setattr(main_module, "close_redis", AsyncMock())
+    monkeypatch.setattr(main_module, "close_graph", AsyncMock())
     monkeypatch.setattr(main_module, "close_postgres", AsyncMock())
     monkeypatch.setattr(main_module, "close_supabase", lambda: None)
 
