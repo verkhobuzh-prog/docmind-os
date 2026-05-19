@@ -90,12 +90,14 @@ class RAGService:
         )
 
         citations = _extract_citations(answer, label_map, compressed)
+        risk_fields = await self._assess_risk(user_id=user_id, chunks=compressed)
         return ChatResponse(
             answer=answer,
             sources=sources,
             citations=citations,
             model=settings.DEFAULT_LLM_MODEL,
             query=query,
+            **risk_fields,
         )
 
     async def query_stream(
@@ -156,7 +158,8 @@ class RAGService:
 
         answer = "".join(full)
         citations = _extract_citations(answer, label_map, compressed)
-        yield f"data: {json.dumps({'type': 'done', 'answer': answer, 'citations': [c.model_dump(mode='json') for c in citations], 'model': settings.DEFAULT_LLM_MODEL})}\n\n"
+        risk_fields = await self._assess_risk(user_id=user_id, chunks=compressed)
+        yield f"data: {json.dumps({'type': 'done', 'answer': answer, 'citations': [c.model_dump(mode='json') for c in citations], 'model': settings.DEFAULT_LLM_MODEL, **risk_fields})}\n\n"
 
     async def _generate_answer(
         self,
@@ -183,6 +186,78 @@ class RAGService:
             return response.choices[0].message.content or ""
 
         return await asyncio.to_thread(_call)
+
+    async def _assess_risk(
+        self,
+        *,
+        user_id: str,
+        chunks: list[RetrievedChunk],
+    ) -> dict[str, int | str | None]:
+        """Confidence propagation risk check from provenance triples in retrieved documents."""
+        result: dict[str, int | str | None] = {
+            "risk_score": 0,
+            "risk_level": "low",
+            "risk_warning": None,
+            "low_confidence_facts": 0,
+            "disputed_facts": 0,
+            "total_facts_analyzed": 0,
+        }
+        if not settings.PROVENANCE_ENABLED:
+            return result
+
+        try:
+            from app.services.provenance_service import ProvenanceService
+
+            prov_svc = ProvenanceService()
+
+            doc_ids = list({str(chunk.document_id) for chunk in chunks})
+
+            all_triples: list[dict[str, Any]] = []
+            for doc_id in doc_ids[:5]:
+                triples_data = await prov_svc.get_triples_for_document(
+                    doc_id=doc_id,
+                    user_id=user_id,
+                    min_confidence=0.0,
+                )
+                all_triples.extend(triples_data)
+
+            if all_triples:
+                low_conf = sum(1 for t in all_triples if t.get("confidence", 1.0) < 0.5)
+                disputed = sum(
+                    1 for t in all_triples if t.get("validation_status") == "disputed"
+                )
+                total = len(all_triples)
+
+                low_ratio = low_conf / total if total > 0 else 0
+                disp_ratio = disputed / total if total > 0 else 0
+                risk_score = int((low_ratio * 0.6 + disp_ratio * 0.4) * 100)
+
+                result = {
+                    "risk_score": risk_score,
+                    "risk_level": (
+                        "low"
+                        if risk_score <= 25
+                        else "medium"
+                        if risk_score <= 50
+                        else "high"
+                        if risk_score <= 75
+                        else "critical"
+                    ),
+                    "risk_warning": None,
+                    "low_confidence_facts": low_conf,
+                    "disputed_facts": disputed,
+                    "total_facts_analyzed": total,
+                }
+
+                if risk_score > 50:
+                    result["risk_warning"] = (
+                        f"⚠️ This answer is based on {low_conf} low-confidence "
+                        f"and {disputed} disputed facts. Verify before acting."
+                    )
+        except Exception as exc:
+            logger.warning("Risk assessment failed: %s", exc)
+
+        return result
 
 
 def _build_context_block(chunks: list[RetrievedChunk]) -> tuple[str, dict[int, RetrievedChunk]]:

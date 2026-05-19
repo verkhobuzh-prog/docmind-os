@@ -53,6 +53,9 @@ export function ChatPage() {
         content: res.answer,
         sources: normalizeSources(res.sources as Array<Record<string, unknown>>),
         citations: res.citations,
+        risk_score: res.risk_score,
+        risk_level: res.risk_level,
+        risk_warning: res.risk_warning,
       }])
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Помилка'
@@ -148,6 +151,16 @@ export function ChatPage() {
                   ? 'bg-brand-600 text-white rounded-tr-sm'
                   : 'bg-white dark:bg-surface-dark-1 border border-surface-2 dark:border-surface-dark-3 text-gray-900 dark:text-gray-100 rounded-tl-sm'}
               `}>
+                {msg.role === 'assistant' && (msg.risk_score ?? 0) > 50 && (
+                  <div className="mb-3 flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>
+                      ⚠️ This answer contains low-confidence information. Risk:{' '}
+                      <strong>{msg.risk_level ?? 'unknown'}</strong>
+                      {msg.risk_warning ? ` — ${msg.risk_warning}` : ''}
+                    </span>
+                  </div>
+                )}
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>

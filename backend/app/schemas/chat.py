@@ -50,3 +50,9 @@ class ChatResponse(BaseModel):
     citations: list[Citation] = Field(default_factory=list)
     model: str
     query: str
+    risk_score: int = 0
+    risk_level: str = "low"
+    risk_warning: str | None = None
+    low_confidence_facts: int = 0
+    disputed_facts: int = 0
+    total_facts_analyzed: int = 0

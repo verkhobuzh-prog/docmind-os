@@ -81,6 +81,9 @@ export interface ChatMessage {
   content: string
   sources?: Array<{ chunk_id: string; content: string; similarity: number }>
   citations?: string[]
+  risk_score?: number
+  risk_level?: string
+  risk_warning?: string | null
 }
 
 export interface ChatResponse {
@@ -88,6 +91,50 @@ export interface ChatResponse {
   sources: Array<{ chunk_id: string; content: string; similarity: number }>
   citations: string[]
   model?: string
+  risk_score?: number
+  risk_level?: string
+  risk_warning?: string | null
+  low_confidence_facts?: number
+  disputed_facts?: number
+  total_facts_analyzed?: number
+}
+
+export interface RiskAnalysisResponse {
+  risk_score: number
+  risk_level: 'low' | 'medium' | 'high' | 'critical' | string
+  explanation: string
+  low_confidence_triples: number
+  disputed_triples: number
+  total_triples: number
+  analyzed_documents: number
+}
+
+export interface ReasoningFinding {
+  finding_type: string
+  severity: string
+  title: string
+  description: string
+  entities_involved: string[]
+  doc_ids_involved: string[]
+  evidence: string[]
+  confidence: number
+  recommendation: string
+}
+
+export interface DocumentAnalysisResponse {
+  doc_id: string
+  findings: ReasoningFinding[]
+  total_findings: number
+  risk_score: number
+  analyzed_at: string
+}
+
+export interface CompareDocumentsResponse {
+  documents_analyzed: number
+  common_entities: string[]
+  contradictions: ReasoningFinding[]
+  risk_score: number
+  summary: string
 }
 
 export interface KnowledgeGraphNode {
@@ -116,6 +163,23 @@ export interface KnowledgeStats {
   total_triples_in_db: number
   graph_enabled: boolean
   triple_extraction_enabled: boolean
+}
+
+export interface ConfidenceSummary {
+  total_triples: number
+  avg_confidence: number
+  high_confidence: number
+  medium_confidence: number
+  low_confidence: number
+  disputed: number
+}
+
+export interface ProvenanceSource {
+  id: string
+  evidence_quote: string | null
+  doc_id: string
+  confidence: number
+  validation_status: string
 }
 
 export interface UserProfile {
@@ -228,6 +292,34 @@ export const api = {
       request<{ doc_id: string; triples: Record<string, unknown>[]; total: number }>(
         `/api/v1/knowledge/documents/${docId}/triples`,
       ),
+    confidenceSummary: () =>
+      request<ConfidenceSummary>('/api/v1/knowledge/provenance/confidence-summary'),
+    entityProvenance: (entityName: string, minConfidence = 0) =>
+      request<{ entity: string; sources: ProvenanceSource[]; total: number }>(
+        `/api/v1/knowledge/provenance/entity/${encodeURIComponent(entityName)}?min_confidence=${minConfidence}`,
+      ),
+    disputeTriple: (tripleId: string) =>
+      request<{ success: boolean; triple_id: string }>(
+        `/api/v1/knowledge/triples/${tripleId}/dispute`,
+        { method: 'PATCH' },
+      ),
+    riskAnalysis: (body: { text?: string; doc_ids?: string[] } = {}) =>
+      request<RiskAnalysisResponse>('/api/v1/knowledge/risk-analysis', {
+        method: 'POST',
+        body: JSON.stringify({ text: body.text ?? '', doc_ids: body.doc_ids }),
+      }),
+  },
+
+  reasoning: {
+    analyzeDocument: (docId: string) =>
+      request<DocumentAnalysisResponse>(`/api/v1/reasoning/analyze/${docId}`, {
+        method: 'POST',
+      }),
+    compareDocuments: (docIds: string[]) =>
+      request<CompareDocumentsResponse>('/api/v1/reasoning/compare', {
+        method: 'POST',
+        body: JSON.stringify({ doc_ids: docIds }),
+      }),
   },
 
   profiles: {

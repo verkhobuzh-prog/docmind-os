@@ -10,6 +10,7 @@ from falkordb.graph import Graph
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.db.graph import get_graph, ping_graph
+from app.db.supabase import get_supabase, run_supabase
 from app.knowledge.ontology import SemanticTriple
 
 logger = get_logger(__name__)
@@ -36,32 +37,71 @@ class GraphService:
         return get_graph(settings.GRAPH_DB_NAME)
 
     async def upsert_triples(self, triples: list[SemanticTriple], doc_id: str) -> int:
-        if not settings.graph_configured:
-            logger.debug("Graph DB not configured; skipping upsert_triples")
-            return 0
-
-        graph = self._graph()
-        if graph is None:
-            logger.debug("Graph DB unavailable; skipping upsert_triples")
-            return 0
-
         if not triples:
             return 0
 
         written = 0
-        for triple in triples:
-            try:
-                await asyncio.to_thread(self._upsert_one, graph, triple, doc_id)
-                written += 1
-            except Exception as exc:
-                logger.warning(
-                    "Failed to upsert triple %s -[%s]-> %s: %s",
-                    triple.subject,
-                    triple.predicate.value,
-                    triple.object_,
-                    exc,
-                )
+        if settings.graph_configured:
+            graph = self._graph()
+            if graph is None:
+                logger.debug("Graph DB unavailable; skipping FalkorDB upsert")
+            else:
+                for triple in triples:
+                    try:
+                        await asyncio.to_thread(self._upsert_one, graph, triple, doc_id)
+                        written += 1
+                    except Exception as exc:
+                        logger.warning(
+                            "Failed to upsert triple %s -[%s]-> %s: %s",
+                            triple.subject,
+                            triple.predicate.value,
+                            triple.object_,
+                            exc,
+                        )
+        else:
+            logger.debug("Graph DB not configured; skipping FalkorDB upsert")
+
+        saved = await self._persist_triples_to_postgres(triples, doc_id)
+        logger.info("Persisted %d triples to Postgres", saved)
         return written
+
+    async def _persist_triples_to_postgres(
+        self, triples: list[SemanticTriple], doc_id: str
+    ) -> int:
+        """Зберігає трійки в semantic_triples таблицю Supabase для аудиту."""
+        if not triples:
+            return 0
+
+        rows = []
+        for t in triples:
+            row = {
+                "doc_id": doc_id,
+                "chunk_id": t.provenance.chunk_id if t.provenance else None,
+                "subject": t.subject,
+                "subject_type": t.subject_type.value,
+                "predicate": t.predicate.value,
+                "object_": t.object_,
+                "object_type": t.object_type.value,
+                "confidence": t.confidence,
+                "evidence_quote": t.evidence_quote[:500] if t.evidence_quote else None,
+                "valid_from": t.valid_from.isoformat() if t.valid_from else None,
+                "valid_to": t.valid_to.isoformat() if t.valid_to else None,
+                "extraction_model": t.provenance.extraction_model if t.provenance else None,
+                "validation_status": t.provenance.validation_status
+                if t.provenance
+                else "auto-extracted",
+            }
+            rows.append(row)
+
+        try:
+            client = get_supabase()
+            await run_supabase(
+                lambda: client.table("semantic_triples").insert(rows).execute()
+            )
+            return len(rows)
+        except Exception as e:
+            logger.warning("Failed to persist triples to Postgres: %s", e)
+            return 0
 
     @staticmethod
     def _upsert_one(graph: Graph, triple: SemanticTriple, doc_id: str) -> None:
