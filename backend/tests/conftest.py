@@ -1,16 +1,21 @@
-"""Pytest fixtures for DocMind OS API tests."""
+"""
+Shared fixtures для всіх тестів DocMind OS.
+Принцип: мокаємо зовнішні сервіси (Supabase, OpenAI),
+тестуємо власну логіку.
+"""
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 
+import app.main as main_module
 from app.core.security import DEV_USER_ID, get_current_user
 from app.main import app
-import app.main as main_module
 from app.schemas.chat import ChatResponse, Citation, Source
 from app.schemas.document import DocumentListResponse, DocumentResponse, DocumentUploadResponse
 from app.schemas.ingestion import IngestionResponse, IngestionStatus
@@ -28,6 +33,162 @@ TEST_USER = {
 }
 
 
+# ---------- Test user ----------
+@pytest.fixture
+def test_user_id() -> str:
+    return "test-user-00000000-0000-0000-0000-000000000001"
+
+
+# ---------- Test profiles ----------
+@pytest.fixture
+def education_profile_l1():
+    """Школяр 5-6 клас — найпростіший рівень."""
+    from app.schemas.profile import ProfilePreferences, ProfileRead
+
+    return ProfileRead(
+        id=uuid4(),
+        user_id=uuid4(),
+        name="5 клас Алгебра",
+        complexity_level=1,
+        domain="education",
+        is_active=True,
+        preferences=ProfilePreferences(
+            response_style="concise",
+            language="uk",
+            forbidden_topics=[],
+            temperature=0.2,
+        ),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+
+
+@pytest.fixture
+def education_profile_l5():
+    """Студент / олімпіадник — експертний рівень."""
+    from app.schemas.profile import ProfilePreferences, ProfileRead
+
+    return ProfileRead(
+        id=uuid4(),
+        user_id=uuid4(),
+        name="Олімпіада з математики",
+        complexity_level=5,
+        domain="education",
+        is_active=True,
+        preferences=ProfilePreferences(response_style="detailed", language="uk"),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+
+
+@pytest.fixture
+def legal_profile_l5():
+    """Юрист — експертний рівень."""
+    from app.schemas.profile import ProfilePreferences, ProfileRead
+
+    return ProfileRead(
+        id=uuid4(),
+        user_id=uuid4(),
+        name="Юридичний режим",
+        complexity_level=5,
+        domain="legal",
+        is_active=True,
+        preferences=ProfilePreferences(response_style="detailed", language="uk"),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+
+
+@pytest.fixture
+def business_profile_l3():
+    """Менеджер — середній рівень."""
+    from app.schemas.profile import ProfilePreferences, ProfileRead
+
+    return ProfileRead(
+        id=uuid4(),
+        user_id=uuid4(),
+        name="Бізнес-аналітик",
+        complexity_level=3,
+        domain="business",
+        is_active=True,
+        preferences=ProfilePreferences(response_style="balanced", language="uk"),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+
+
+# ---------- Mock Supabase ----------
+@pytest.fixture
+def mock_supabase():
+    """Повний мок Supabase клієнта."""
+    mock = MagicMock()
+    table_mock = MagicMock()
+    execute_mock = AsyncMock(return_value=MagicMock(data=[], error=None))
+
+    table_mock.select.return_value = table_mock
+    table_mock.insert.return_value = table_mock
+    table_mock.update.return_value = table_mock
+    table_mock.delete.return_value = table_mock
+    table_mock.eq.return_value = table_mock
+    table_mock.single.return_value = table_mock
+    table_mock.maybe_single.return_value = table_mock
+    table_mock.order.return_value = table_mock
+    table_mock.execute = execute_mock
+
+    mock.table.return_value = table_mock
+    return mock
+
+
+# ---------- Mock OpenAI ----------
+@pytest.fixture
+def mock_openai_chat():
+    """Мок OpenAI chat completion."""
+    response = MagicMock()
+    response.choices = [MagicMock(message=MagicMock(content="Тестова відповідь AI."))]
+    return AsyncMock(return_value=response)
+
+
+@pytest.fixture
+def mock_embeddings():
+    """Мок embeddings — повертає вектор з 1536 вимірів."""
+    import random
+
+    vec = [random.uniform(-1, 1) for _ in range(1536)]
+    response = MagicMock()
+    response.data = [MagicMock(embedding=vec)]
+    return AsyncMock(return_value=response)
+
+
+# ---------- Sample documents ----------
+@pytest.fixture
+def sample_chunks():
+    """Тестові фрагменти документів для RAG."""
+    return [
+        {
+            "chunk_id": "chunk-001",
+            "content": "Орендар зобов'язаний сплачувати орендну плату в розмірі 5000 грн щомісяця до 10 числа.",
+            "similarity": 0.95,
+            "document_id": "doc-001",
+            "metadata": {"filename": "contract.pdf", "page": 1},
+        },
+        {
+            "chunk_id": "chunk-002",
+            "content": "Договір укладається терміном на 12 місяців з дати підписання.",
+            "similarity": 0.88,
+            "document_id": "doc-001",
+            "metadata": {"filename": "contract.pdf", "page": 1},
+        },
+        {
+            "chunk_id": "chunk-003",
+            "content": "У разі затримки оплати більш ніж на 5 днів нараховується пеня 0.1% від суми боргу.",
+            "similarity": 0.82,
+            "document_id": "doc-001",
+            "metadata": {"filename": "contract.pdf", "page": 2},
+        },
+    ]
+
+
+# ---------- Legacy API test fixtures ----------
 @pytest.fixture(autouse=True)
 def disable_external_startup(monkeypatch):
     """Prevent tests from connecting to real Supabase/Redis/Postgres on startup."""
@@ -65,7 +226,7 @@ def sample_document_id() -> UUID:
 
 @pytest.fixture(autouse=True)
 def mock_services(monkeypatch, sample_document_id):
-    """Mock external services (Supabase, OpenAI) for unit tests."""
+    """Mock external services for legacy API integration tests."""
 
     async def mock_upload(self, file, current_user, org_id=None):
         from datetime import datetime, timezone
@@ -100,7 +261,7 @@ def mock_services(monkeypatch, sample_document_id):
             message="ok",
         )
 
-    async def mock_chat(self, query, current_user, document_ids=None, top_k=None):
+    async def mock_chat(self, *, query, user_id, document_ids=None, top_k=None):
         return ChatResponse(
             answer=f"Answer to: {query} [1]",
             sources=[

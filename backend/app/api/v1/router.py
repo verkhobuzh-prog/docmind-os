@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import auth, chat, documents, ingestion
+from app.api.v1.endpoints.profiles import profiles_router
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -19,3 +20,4 @@ api_router.include_router(
     prefix="/chat",
     tags=["chat"],
 )
+api_router.include_router(profiles_router)

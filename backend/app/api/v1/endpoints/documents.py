@@ -76,3 +76,17 @@ async def get_document(
             detail="Document not found",
         )
     return document
+
+
+@documents_router.delete(
+    "/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Soft delete document",
+)
+async def delete_document(
+    document_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    doc_service: Annotated[DocumentService, Depends(get_document_service)],
+) -> None:
+    """Soft delete документа"""
+    await doc_service.delete_document(document_id, str(current_user["id"]))

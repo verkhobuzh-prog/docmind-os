@@ -27,11 +27,21 @@ All notable changes to DocMind OS are documented in this file.
 
 See [docs/PHASE1_COMPLETION.md](docs/PHASE1_COMPLETION.md).
 
+## [0.2.0] - 2026-05-17 — Phase 2 Frontend
+
+### Added
+
+- React + Vite + Tailwind frontend with Supabase auth
+- Dashboard (upload, document list, selection for scoped chat)
+- Chat UI with citation display
+- Settings page with Trust Level guardrails
+- Docker Compose frontend service (dev)
+- Production Dockerfile (`frontend/Dockerfile.prod`) + nginx
+
 ---
 
-## [Unreleased] — Phase 2
+## [Unreleased] — Phase 3
 
 - Multi-tenant organizations and workspaces
-- React frontend
 - Temporal workflows
 - Advanced reranking and hybrid search

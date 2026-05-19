@@ -1,8 +1,26 @@
+import { useEffect } from 'react'
+import { useAuthStore } from '@/stores/authStore'
+import { AuthPage } from '@/pages/AuthPage'
+import { DashboardLayout } from '@/layouts/DashboardLayout'
+import { Toaster } from 'react-hot-toast'
+
 export default function App() {
+  const { user, refreshToken } = useAuthStore()
+
+  useEffect(() => {
+    refreshToken()
+  }, [])
+
   return (
-    <main className="app">
-      <h1>DocMind OS</h1>
-      <p>Phase 1 MVP — frontend scaffold</p>
-    </main>
-  );
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: 'font-sans text-sm',
+          style: { borderRadius: '10px', padding: '12px 16px' },
+        }}
+      />
+      {user ? <DashboardLayout /> : <AuthPage />}
+    </>
+  )
 }

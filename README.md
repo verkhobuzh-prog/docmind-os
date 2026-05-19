@@ -1,63 +1,12 @@
 # DocMind OS (DocumentOS)
 
-> ## ✅ Phase 1 MVP — **COMPLETED**
-> Backend API is production-ready for integration testing.  
-> **Tests:** 9/9 passed | **Docs:** [Phase 1 Report](docs/PHASE1_COMPLETION.md)
+Enterprise AI Document SaaS - upload, parse, search, and chat with citations.
 
-Enterprise AI Document SaaS — upload, parse, search, and chat with business documents.
-
-| | |
-|---|---|
-| **Phase** | 1 ✅ Complete → Phase 2 🚧 In Progress |
-| **Repository** | https://github.com/verkhobuzh-prog/docmind-os |
-
----
-
-## Phase 1 API — All Endpoints
-
-| Status | Method | Endpoint | Auth | Description |
-|--------|--------|----------|------|-------------|
-| ✅ | `GET` | `/health` | — | Health check (Supabase, Redis) |
-| ✅ | `GET` | `/api/v1/auth/me` | JWT | Current user profile |
-| ✅ | `POST` | `/api/v1/documents/upload` | JWT | Upload file + auto-ingest |
-| ✅ | `GET` | `/api/v1/documents` | JWT | List user documents |
-| ✅ | `GET` | `/api/v1/documents/{id}` | JWT | Get document by ID |
-| ✅ | `POST` | `/api/v1/documents/{id}/ingest` | JWT | Parse, chunk, embed |
-| ✅ | `POST` | `/api/v1/chat` | JWT | RAG Q&A + citations (SSE) |
-
-**Swagger UI:** http://localhost:8000/docs
-
-### Example: Upload
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/documents/upload" \
-  -H "Authorization: Bearer $SUPABASE_JWT" \
-  -F "file=@report.pdf"
-```
-
-### Example: Chat
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/chat" \
-  -H "Authorization: Bearer $SUPABASE_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What are the key findings?", "top_k": 8}'
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| API | Python 3.12, FastAPI, Uvicorn |
-| Auth / Storage | Supabase |
-| Database | PostgreSQL 16 + pgvector |
-| Cache | Redis 7 |
-| AI | OpenAI (embeddings + GPT-4o-mini) |
-| Parsing | PyMuPDF, pandas, tiktoken |
-
----
+| Phase | Status |
+|-------|--------|
+| Phase 1 | Complete - FastAPI backend, RAG, Docker |
+| Phase 2 | Complete - React frontend (Vite + Tailwind) |
+| Repository | https://github.com/verkhobuzh-prog/docmind-os |
 
 ## Quick Start
 
@@ -65,41 +14,66 @@ curl -X POST "http://localhost:8000/api/v1/chat" \
 git clone https://github.com/verkhobuzh-prog/docmind-os.git
 cd docmind-os
 cp .env.example .env
-# Set: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY
-docker compose up --build backend postgres redis
+docker compose up --build
 ```
 
 | Service | URL |
 |---------|-----|
 | API | http://localhost:8000 |
-| Docs | http://localhost:8000/docs |
-| Health | http://localhost:8000/health |
+| Frontend (dev) | http://localhost:5173 |
 
-## Run Tests
+Frontend local dev:
+
+```bash
+cd frontend && cp .env.example .env && npm install && npm run dev
+```
+
+## 🧪 Тести
+
+### Швидкий запуск (всі тести, < 30 секунд)
 
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest -v
+python -m tests.run_tests
 ```
 
-## Roadmap
+### По шарах
 
-| Phase | Status | Focus |
-|-------|--------|-------|
-| **Phase 1** | ✅ **Done** | Auth, upload, ingestion, RAG chat |
-| **Phase 2** | 🚧 In Progress | Multi-tenant, frontend, Temporal, reranking |
-| Phase 3 | Planned | Billing (Stripe), integrations, observability |
-| Phase 4 | Planned | LLM router, conflict resolution, evaluation |
+```bash
+# Smoke — чи взагалі запускається
+pytest tests/smoke/ -v
 
-## Documentation
+# Unit — prompt builder, schemas
+pytest tests/unit/ -v
 
-- [**Architectural Passport**](docs/ARCHITECTURAL_PASSPORT.md) — архітектурний паспорт
-- [Developer Passport](docs/DEVELOPER_PASSPORT.md) — онбординг розробника
-- [Phase 1 Completion Report](docs/PHASE1_COMPLETION.md)
-- [Platform Architecture](docs/architecture/README.md)
-- [CHANGELOG](CHANGELOG.md)
+# RAG quality — якість відповідей
+pytest tests/rag/ -v
+```
 
-## License
+### Coverage
 
-Proprietary — All rights reserved.
+```bash
+pytest tests/ --cov=app --cov-report=term-missing
+```
+
+### Що тестується
+
+| Шар | Що перевіряє | Критичність |
+|-----|-------------|-------------|
+| Smoke | Імпорти, routes, config | Блокер |
+| Unit | Prompt builder для всіх профілів, Pydantic schemas | Блокер |
+| RAG | Антигалюцинація, ізоляція даних, similarity threshold | Блокер |
+
+## Phase 2 Frontend
+
+- Auth (Supabase login/register)
+- Dashboard (upload, list, re-index, document selection)
+- Chat (RAG + citations, scoped to selected documents)
+- Settings (Trust Level guardrails)
+
+## Docs
+
+- [Architectural Passport](docs/ARCHITECTURAL_PASSPORT.md)
+- [Developer Passport](docs/DEVELOPER_PASSPORT.md)
+- [Phase 1 Completion](docs/PHASE1_COMPLETION.md)

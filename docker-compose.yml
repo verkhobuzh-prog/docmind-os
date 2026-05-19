@@ -70,10 +70,26 @@ services:
       timeout: 3s
       retries: 5
 
-  # Frontend — dev stub only (not built in Phase 1 focus)
-  # frontend:
-  #   profiles: ["frontend"]
-  #   ...
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: docmind-web
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    env_file:
+      - .env
+    environment:
+      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

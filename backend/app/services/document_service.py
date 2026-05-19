@@ -171,3 +171,29 @@ class DocumentService:
         if result.data is None:
             return None
         return _row_to_response(result.data)
+
+    async def delete_document(self, document_id: str, user_id: str) -> None:
+        if not settings.supabase_configured:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Storage service is not configured",
+            )
+
+        client = get_supabase()
+
+        def _update():
+            return (
+                client.table(TABLE_NAME)
+                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
+                .eq("id", document_id)
+                .eq("user_id", user_id)
+                .is_("deleted_at", "null")
+                .execute()
+            )
+
+        result = await run_supabase(_update)
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found",
+            )
