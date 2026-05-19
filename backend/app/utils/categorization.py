@@ -41,9 +41,14 @@ TYPE_KEYWORDS: list[tuple[str, str]] = [
 
 def is_rag_ingestible(mime_type: str) -> bool:
     """Text documents go through parse/chunk/embed; media are catalog-only."""
+    from app.core.config import settings
+    from app.services.document_upload_policy import AUDIO_MIME_TYPES, is_audio_file
+
     mime = (mime_type or "").lower()
-    if mime.startswith("image/") or mime.startswith("video/") or mime.startswith("audio/"):
+    if mime.startswith("image/") or mime.startswith("video/"):
         return False
+    if is_audio_file("", mime) or mime in AUDIO_MIME_TYPES:
+        return settings.openai_configured
     return True
 
 

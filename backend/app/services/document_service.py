@@ -8,6 +8,7 @@ from fastapi import HTTPException, UploadFile, status
 from app.core.config import settings
 from app.db.supabase import get_signed_url, get_supabase, run_supabase, upload_file
 from app.services.document_enrichment import enrich_document_after_upload
+from app.services.document_upload_policy import validate_upload
 from app.utils.categorization import is_rag_ingestible
 from app.schemas.document import (
     DocumentListResponse,
@@ -16,17 +17,6 @@ from app.schemas.document import (
 )
 
 TABLE_NAME = "documents"
-MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
-ALLOWED_MIME_PREFIXES = (
-    "application/pdf",
-    "application/vnd.",
-    "application/msword",
-    "application/json",
-    "text/",
-    "image/",
-    "video/",
-    "audio/",
-)
 
 
 def _sanitize_filename(name: str) -> str:
@@ -74,18 +64,8 @@ class DocumentService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Empty file",
             )
-        if size_bytes > MAX_UPLOAD_BYTES:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File exceeds maximum size of {MAX_UPLOAD_BYTES} bytes",
-            )
-
         mime_type = file.content_type or "application/octet-stream"
-        if not any(mime_type.startswith(p) for p in ALLOWED_MIME_PREFIXES):
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported file type: {mime_type}",
-            )
+        validate_upload(file.filename or "", mime_type, size_bytes)
 
         user_id = str(current_user["id"])
         document_id = uuid4()

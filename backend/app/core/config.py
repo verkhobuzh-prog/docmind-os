@@ -66,6 +66,12 @@ class Settings(BaseSettings):
     # Provenance
     PROVENANCE_ENABLED: bool = True
 
+    # Extended Parsers
+    AUDIO_TRANSCRIPTION_ENABLED: bool = False
+    MAX_DOCUMENT_SIZE_MB: int = 25
+    MAX_AUDIO_SIZE_MB: int = 100
+    SUPPORTED_AUDIO_FORMATS: str = "mp3,mp4,m4a,wav,webm,ogg"
+
     # RAG / Chat
     RAG_TOP_K: int = Field(default=8, ge=1, le=20)
     RAG_VECTOR_WEIGHT: float = Field(default=0.7, ge=0.0, le=1.0)
@@ -102,6 +108,18 @@ class Settings(BaseSettings):
     @property
     def openai_configured(self) -> bool:
         return bool(self.OPENAI_API_KEY)
+
+    @property
+    def audio_enabled(self) -> bool:
+        return self.AUDIO_TRANSCRIPTION_ENABLED and bool(self.OPENAI_API_KEY)
+
+    @property
+    def max_document_bytes(self) -> int:
+        return self.MAX_DOCUMENT_SIZE_MB * 1024 * 1024
+
+    @property
+    def max_audio_bytes(self) -> int:
+        return self.MAX_AUDIO_SIZE_MB * 1024 * 1024
 
     @property
     def auth_disabled(self) -> bool:

@@ -8,6 +8,7 @@ from app.core.security import get_current_org, get_current_user
 from app.services.ingestion_service import get_ingestion_service
 from app.schemas.document import DocumentListResponse, DocumentResponse, DocumentUploadResponse
 from app.services.document_service import DocumentService
+from app.services.document_upload_policy import MAX_AUDIO_SIZE, MAX_DOCUMENT_SIZE
 
 documents_router = APIRouter()
 
@@ -23,7 +24,17 @@ def get_document_service() -> DocumentService:
     summary="Upload a document file",
 )
 async def upload_document(
-    file: Annotated[UploadFile, File(description="Document file (PDF, DOCX, XLSX, TXT, images)")],
+    file: Annotated[
+        UploadFile,
+        File(
+            description=(
+                "Document file: PDF, TXT, MD, DOCX, PPTX, XLSX, XLS, CSV"
+                "; audio MP3/M4A/WAV/WebM/OGG when OpenAI is configured. "
+                f"Max {MAX_DOCUMENT_SIZE // (1024 * 1024)}MB documents, "
+                f"{MAX_AUDIO_SIZE // (1024 * 1024)}MB audio."
+            ),
+        ),
+    ],
     current_user: Annotated[dict, Depends(get_current_user)],
     service: Annotated[DocumentService, Depends(get_document_service)],
     background_tasks: BackgroundTasks,
