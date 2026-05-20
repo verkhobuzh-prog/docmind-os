@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 
 from app.core.config import settings
 
-MAX_DOCUMENT_SIZE = 25 * 1024 * 1024  # 25MB
-MAX_AUDIO_SIZE = 100 * 1024 * 1024  # 100MB
+MAX_DOCUMENT_SIZE = settings.max_document_bytes
+MAX_AUDIO_SIZE = settings.max_audio_bytes
 
 ALLOWED_EXTENSIONS = {
     ".pdf",
@@ -77,7 +77,7 @@ def is_audio_file(ext: str, mime_type: str) -> bool:
 
 def allowed_extensions() -> set[str]:
     base = {e for e in ALLOWED_EXTENSIONS if e not in AUDIO_EXTENSIONS}
-    if settings.openai_configured:
+    if settings.audio_enabled:
         return base | set(AUDIO_EXTENSIONS)
     return base
 
@@ -87,10 +87,13 @@ def validate_upload(filename: str, mime_type: str, size_bytes: int) -> None:
     mime = (mime_type or "application/octet-stream").lower()
     audio = is_audio_file(ext, mime)
 
-    if audio and not settings.openai_configured:
+    if audio and not settings.audio_enabled:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Audio upload requires OpenAI API key (OPENAI_API_KEY)",
+            detail=(
+                "Audio upload requires audio transcription "
+                "(AUDIO_TRANSCRIPTION_ENABLED=true and OPENAI_API_KEY)"
+            ),
         )
 
     ext_ok = ext in allowed_extensions()

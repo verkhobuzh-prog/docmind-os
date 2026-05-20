@@ -103,19 +103,37 @@ class ProvenanceService:
 
         client = get_supabase()
 
-        def _query():
+        def _query_as_subject():
             return (
                 client.table(TRIPLES_TABLE)
                 .select(_ENTITY_FIELDS)
                 .in_("doc_id", doc_ids)
-                .or_(f"subject.eq.{entity_name},object_.eq.{entity_name}")
-                .order("confidence", desc=True)
+                .eq("subject", entity_name)
+                .execute()
+            )
+
+        def _query_as_object():
+            return (
+                client.table(TRIPLES_TABLE)
+                .select(_ENTITY_FIELDS)
+                .in_("doc_id", doc_ids)
+                .eq("object_", entity_name)
                 .execute()
             )
 
         try:
-            result = await run_supabase(_query)
-            return list(result.data or [])
+            result_as_subject = await run_supabase(_query_as_subject)
+            result_as_object = await run_supabase(_query_as_object)
+            rows = (result_as_subject.data or []) + (result_as_object.data or [])
+            seen: set[str] = set()
+            unique_rows: list[dict] = []
+            for row in rows:
+                row_id = str(row["id"])
+                if row_id not in seen:
+                    seen.add(row_id)
+                    unique_rows.append(row)
+            unique_rows.sort(key=lambda r: float(r.get("confidence", 0)), reverse=True)
+            return unique_rows
         except Exception as exc:
             logger.warning(
                 "Failed to fetch entity provenance for %r (user %s): %s",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
@@ -53,7 +54,8 @@ class IngestionService:
             await self._update_document_status(document_id, IngestionStatus.PARSING)
 
             raw = await download_file(doc["storage_path"])
-            parsed = parse_document(
+            parsed = await asyncio.to_thread(
+                parse_document,
                 raw,
                 doc.get("mime_type") or "application/octet-stream",
                 doc.get("filename") or "",

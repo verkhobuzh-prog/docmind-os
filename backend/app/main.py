@@ -1,3 +1,4 @@
+import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,9 +14,26 @@ from app.db.postgres import close_postgres, init_postgres
 from app.middleware.request_context import RequestContextMiddleware
 
 
+async def _startup_security_check() -> None:
+    """Prevent dangerous configs in production."""
+    if settings.is_production:
+        if settings.auth_disabled:
+            print(
+                "FATAL: AUTH_DISABLED=true is not allowed in production!",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not settings.supabase_configured:
+            print("FATAL: Supabase not configured in production!", file=sys.stderr)
+            sys.exit(1)
+        if settings.OPENAI_API_KEY == "" or settings.OPENAI_API_KEY is None:
+            print("WARNING: OPENAI_API_KEY not set in production", file=sys.stderr)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    await _startup_security_check()
     init_supabase()
     await init_redis()
     await init_postgres()
