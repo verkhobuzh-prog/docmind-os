@@ -5,9 +5,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPExcepti
 
 from app.core.config import settings
 from app.core.security import get_current_org, get_current_user
-from app.services.ingestion_service import get_ingestion_service
+from app.core.state_machine import DocumentEvent
 from app.schemas.document import DocumentListResponse, DocumentResponse, DocumentUploadResponse
 from app.services.document_service import DocumentService
+from app.services.ingestion_service import get_ingestion_service
+from app.services.lifecycle_service import get_lifecycle_service
 from app.services.document_upload_policy import MAX_AUDIO_SIZE, MAX_DOCUMENT_SIZE
 
 documents_router = APIRouter()
@@ -89,6 +91,77 @@ async def get_document(
             detail="Document not found",
         )
     return document
+
+
+@documents_router.get(
+    "/{document_id}/history",
+    summary="Get document lifecycle event history",
+)
+async def get_document_history(
+    document_id: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    doc_service: Annotated[DocumentService, Depends(get_document_service)],
+    limit: int = 20,
+) -> dict:
+    document = await doc_service.get_by_id(document_id, current_user["id"])
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
+
+    lifecycle = get_lifecycle_service()
+    doc_id = str(document_id)
+    history = await lifecycle.get_history(doc_id, limit=limit)
+    current_state = await lifecycle.get_state(doc_id)
+
+    return {
+        "doc_id": doc_id,
+        "history": history,
+        "current_state": current_state.value,
+    }
+
+
+@documents_router.post(
+    "/{document_id}/retry",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Retry ingestion for a failed document",
+)
+async def retry_document_ingestion(
+    document_id: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    doc_service: Annotated[DocumentService, Depends(get_document_service)],
+    background_tasks: BackgroundTasks,
+) -> dict:
+    document = await doc_service.get_by_id(document_id, current_user["id"])
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
+
+    lifecycle = get_lifecycle_service()
+    doc_id = str(document_id)
+    user_id = str(current_user["id"])
+
+    if not await lifecycle.can_retry(doc_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Max retries exceeded or document not in failed state",
+        )
+
+    retry_count = await lifecycle.increment_retry(doc_id)
+    await lifecycle.transition(doc_id, user_id, DocumentEvent.RETRY)
+    await lifecycle.transition(doc_id, user_id, DocumentEvent.QUEUE)
+
+    ingestion = get_ingestion_service()
+    background_tasks.add_task(ingestion.start_ingestion, document_id, current_user)
+
+    return {
+        "doc_id": doc_id,
+        "retry_count": retry_count,
+        "status": "queued",
+    }
 
 
 @documents_router.delete(
