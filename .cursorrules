@@ -1,0 +1,9 @@
+# DocMind OS — Cursor rules (Phase 1)
+
+- Docs: `docs/DEVELOPER_PASSPORT.md` (onboarding), `docs/ARCHITECTURAL_PASSPORT.md` (architecture)
+- Stack: FastAPI + Supabase + React (Vite, TypeScript)
+- Backend entry: `backend/app/main.py`; run uvicorn from `backend/`
+- Use `app/core/config.py` for env; never commit `.env`
+- API routes under `/api/v1/`; health at `/health`
+- Prefer service layer over fat route handlers
+- Match existing naming and folder layout when adding features

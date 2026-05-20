@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 10px;
+  }
+  body {
+    @apply bg-surface-0 text-gray-900 font-sans antialiased;
+  }
+  .dark body {
+    @apply bg-surface-dark-0 text-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 text-white font-medium text-sm
+           hover:bg-brand-700 active:scale-[.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 font-medium text-sm
+           hover:bg-surface-1 dark:hover:bg-surface-dark-2 active:scale-[.98] transition-all duration-150;
+  }
+  .card {
+    @apply bg-white dark:bg-surface-dark-1 rounded-xl border border-surface-2 dark:border-surface-dark-3 shadow-sm;
+  }
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-surface-2 dark:border-surface-dark-3
+           bg-white dark:bg-surface-dark-2 text-sm text-gray-900 dark:text-gray-100
+           focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all;
+  }
+}
