@@ -7,6 +7,7 @@ import {
   Clock, RefreshCw, Trash2, Plus, AlertCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { IngestionProgressBar } from '@/components/documents/IngestionProgressBar'
 import { formatBytes, formatDate } from '@/lib/utils'
 
 const STATUS_CONFIG = {
@@ -160,19 +161,25 @@ export function DocumentsPage() {
               {docs.map((doc: Document) => {
                 const cfg = STATUS_CONFIG[doc.status] ?? STATUS_CONFIG.uploaded
                 const StatusIcon = cfg.icon
+                const showProgress = !['ready', 'indexed'].includes(doc.status?.toLowerCase())
                 return (
                   <tr key={doc.id} className="hover:bg-surface-0 dark:hover:bg-surface-dark-2/50 transition-colors">
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <File className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
-                          {doc.filename}
-                        </span>
-                        {Boolean(doc.metadata?.is_duplicate) && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                            дублікат
-                          </span>
-                        )}
+                      <div className="flex items-start gap-3">
+                        <File className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
+                              {doc.filename}
+                            </span>
+                            {Boolean(doc.metadata?.is_duplicate) && (
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                дублікат
+                              </span>
+                            )}
+                          </div>
+                          {showProgress && <IngestionProgressBar docId={doc.id} />}
+                        </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">

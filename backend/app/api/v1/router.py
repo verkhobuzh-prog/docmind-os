@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     config_public,
     documents,
     ingestion,
+    ingestion_ws,
     invites,
     knowledge,
     reasoning,
@@ -25,6 +26,11 @@ api_router.include_router(
     ingestion.ingestion_router,
     prefix="/documents",
     tags=["ingestion"],
+)
+api_router.include_router(
+    ingestion_ws.router,
+    prefix="/documents",
+    tags=["ingestion-ws"],
 )
 api_router.include_router(
     chat.chat_router,
