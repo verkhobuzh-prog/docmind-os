@@ -30,10 +30,17 @@ openai>=1.55.0,<2.0.0
 # Resilience
 tenacity>=9.0.0,<10.0.0
 
-# Observability (Phase 1 stub)
+# Job queue
+celery[redis]>=5.4.0,<6.0.0
+
+# Observability
 opentelemetry-api>=1.28.0,<2.0.0
 opentelemetry-sdk>=1.28.0,<2.0.0
 opentelemetry-instrumentation-fastapi>=0.49b0,<1.0.0
+opentelemetry-instrumentation-httpx>=0.49b0,<1.0.0
+opentelemetry-instrumentation-redis>=0.49b0,<1.0.0
+opentelemetry-instrumentation-asyncpg>=0.49b0,<1.0.0
+opentelemetry-exporter-otlp-proto-http>=1.28.0,<2.0.0
 
 # Phase 2 — Graph DB
 falkordb>=1.0.0

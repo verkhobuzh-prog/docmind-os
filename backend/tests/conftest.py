@@ -200,14 +200,15 @@ def disable_external_startup(monkeypatch):
     monkeypatch.setattr(main_module, "init_supabase", lambda: None)
     monkeypatch.setattr(main_module, "init_redis", AsyncMock())
     monkeypatch.setattr(main_module, "init_postgres", AsyncMock())
-    monkeypatch.setattr(main_module, "init_graph", AsyncMock())
     monkeypatch.setattr(main_module, "ping_supabase", AsyncMock(return_value=False))
     monkeypatch.setattr(main_module, "ping_redis", AsyncMock(return_value=False))
-    monkeypatch.setattr(main_module, "ping_graph", AsyncMock(return_value=False))
     monkeypatch.setattr(main_module, "close_redis", AsyncMock())
-    monkeypatch.setattr(main_module, "close_graph", AsyncMock())
     monkeypatch.setattr(main_module, "close_postgres", AsyncMock())
     monkeypatch.setattr(main_module, "close_supabase", lambda: None)
+    monkeypatch.setattr(
+        "app.core.startup_validation.run_startup_security_checks",
+        lambda _settings: None,
+    )
 
 
 @pytest.fixture

@@ -1,22 +1,152 @@
+# DocMind OS — повна конфігурація з пінованою FalkorDB
+# ADR-001: FalkorDB обрано над Neo4j
+# docs/adr/ADR-001-graph-database-engine.md
+#
+# Примітки адаптації під repo:
+# - migrations: ./infra/supabase/migrations (не ./backend/db/migrations)
+# - FalkorDB v4.18.6 (ADR-001; не v4.0.5 / latest)
+# - Backend читає GRAPH_DB_* (compose будує URL з FALKORDB_PASSWORD)
+
+version: "3.9"
+
+networks:
+  docmind_net:
+    driver: bridge
+    name: docmind_net
+
+volumes:
+  postgres_data:
+    name: docmind_postgres_data
+  redis_data:
+    name: docmind_redis_data
+  falkordb_data:
+    name: docmind_falkordb_data
+  backend_cache:
+    name: docmind_backend_cache
+
 services:
+  # ── POSTGRESQL + pgvector (vector RAG) ───────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: docmind-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docmind}
+      POSTGRES_USER: ${POSTGRES_USER:-docmind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docmind}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-docmind} -d ${POSTGRES_DB:-docmind}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - docmind_net
+
+  # ── REDIS (cache + rate limiting) ────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: docmind-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-docmind_redis_secret}
+      --appendonly yes
+      --appendfilename redis.aof
+      --maxmemory ${REDIS_MAX_MEMORY:-256mb}
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${REDIS_PASSWORD:-docmind_redis_secret}",
+          "ping",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - docmind_net
+
+  # ── FALKORDB (Knowledge Graph — Legal Domain) ────────────────────────────
+  falkordb:
+    image: falkordb/falkordb:v4.18.6
+    container_name: docmind-falkordb
+    restart: unless-stopped
+    environment:
+      REDIS_ARGS: >-
+        --requirepass ${FALKORDB_PASSWORD:-docmind_graph_secret}
+        --appendonly yes
+        --appendfilename falkordb.aof
+      FALKORDB_MAX_QUEUED_QUERIES: ${FALKORDB_MAX_QUEUED_QUERIES:-25}
+      REDIS_SAVE: "60 1 300 100"
+    ports:
+      - "${FALKORDB_PORT:-6380}:6379"
+    volumes:
+      - falkordb_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          redis-cli -p 6379
+          -a "${FALKORDB_PASSWORD:-docmind_graph_secret}"
+          --no-auth-warning
+          GRAPH.QUERY health_check "RETURN 1"
+          | grep -q "1" || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - docmind_net
+
+  # ── BACKEND (FastAPI) ────────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: docmind-api
+      target: development
+    container_name: docmind-backend
     restart: unless-stopped
-    ports:
-      - "${API_PORT:-8000}:8000"
     env_file:
       - .env
     environment:
       API_HOST: 0.0.0.0
       API_PORT: 8000
-      DATABASE_URL: postgresql://docmind:docmind@postgres:5432/docmind
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-docmind}:${POSTGRES_PASSWORD:-docmind}@postgres:5432/${POSTGRES_DB:-docmind}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-docmind_redis_secret}@redis:6379/0
+      GRAPH_DB_ENABLED: ${GRAPH_DB_ENABLED:-true}
+      GRAPH_DB_URL: redis://:${FALKORDB_PASSWORD:-docmind_graph_secret}@falkordb:6379
+      GRAPH_DB_NAME: ${GRAPH_DB_NAME:-docmind_knowledge}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_JSON: ${LOG_JSON:-false}
+    ports:
+      - "${BACKEND_PORT:-${API_PORT:-8000}}:8000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app:delegated
       - backend_cache:/root/.cache
+      - /app/__pycache__
+      - /app/.pytest_cache
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       postgres:
@@ -36,79 +166,31 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
+    networks:
+      - docmind_net
 
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: docmind-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: docmind
-      POSTGRES_PASSWORD: docmind
-      POSTGRES_DB: docmind
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infra/supabase/migrations:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U docmind -d docmind"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: docmind-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  falkordb:
-    image: falkordb/falkordb:latest
-    container_name: docmind-falkordb
-    ports:
-      - "6380:6379"
-    volumes:
-      - falkordb_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # ── FRONTEND (React + Vite) ──────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: docmind-web
+      target: development
+    container_name: docmind-frontend
     restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-5173}:5173"
     env_file:
       - .env
     environment:
       VITE_SUPABASE_URL: ${SUPABASE_URL}
       VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
-      VITE_API_URL: http://localhost:8000
+      VITE_API_URL: http://localhost:${BACKEND_PORT:-${API_PORT:-8000}}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:delegated
       - /app/node_modules
     depends_on:
       backend:
         condition: service_healthy
-
-volumes:
-  postgres_data:
-  redis_data:
-  falkordb_data:
-  backend_cache:
+    networks:
+      - docmind_net

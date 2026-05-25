@@ -22,3 +22,4 @@ Implemented: Auth, Document Upload, Ingestion (parse/chunk/embed), RAG Chat, hyb
 | [07-observability-cost.md](./07-observability-cost.md) | OTel, AI logs, cost tracking |
 | [08-kubernetes-topology.md](./08-kubernetes-topology.md) | K8s, Helm, GitOps |
 | [09-roadmap.md](./09-roadmap.md) | Phase 1–4 roadmap |
+| [../adr/README.md](../adr/README.md) | Architecture Decision Records (ADR) |

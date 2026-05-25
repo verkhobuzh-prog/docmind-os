@@ -1,0 +1,13 @@
+# DocMind OS Migration Manifest
+# Generated: 2026-05-25T05:32:45.955595+00:00
+# Format: prefix|filename|sha256_prefix
+#
+# CI: compare this file against actual migrations directory.
+
+001|001_documents.sql|07e9cd4e720a
+002|002_document_chunks.sql|8f4e8f2a53ff
+003|003_knowledge_graph_metadata.sql|aa3ea032428c
+004|004_profiles.sql|ab1d0198fcbd
+005|005_rls_hardening.sql|b36c9292ff18
+006|006_pilot_invites_and_catalog.sql|a97a3287675e
+007|007_document_state_machine.sql|693054817b67

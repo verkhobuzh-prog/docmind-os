@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     GRAPH_DB_NAME: str = "docmind_knowledge"
     GRAPH_DB_ENABLED: bool = False
 
+    # Observability (OpenTelemetry → Grafana Cloud Tempo)
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
+    OTEL_GRAFANA_INSTANCE_ID: str = ""
+    OTEL_GRAFANA_API_TOKEN: str = ""
+
     # CORS
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
