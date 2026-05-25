@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.core.config import Settings
 
-logger = logging.getLogger("Doc-Hub.security.startup")
+logger = logging.getLogger("dochub.security.startup")
 
 # Оточення, де AUTH_DISABLED заборонено категорично
 _PROTECTED_ENVIRONMENTS = frozenset({

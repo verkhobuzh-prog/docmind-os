@@ -43,7 +43,7 @@ from starlette.types import ASGIApp
 
 from app.core.config import settings
 
-logger = logging.getLogger("Doc-Hub.rate_limit")
+logger = logging.getLogger("dochub.rate_limit")
 
 # ─── Конфігурація лімітів по prefix ───────────────────────────────────────────
 # Формат: (url_prefix, requests_per_minute, window_seconds)

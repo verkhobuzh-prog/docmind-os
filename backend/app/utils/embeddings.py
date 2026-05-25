@@ -10,7 +10,7 @@ from openai import OpenAI
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("Doc-Hub.embeddings")
+logger = get_logger("dochub.embeddings")
 
 
 async def embed_texts(texts: list[str]) -> list[list[float] | None]:

@@ -14,7 +14,7 @@ from app.db.postgres import get_pool
 from app.db.supabase import get_supabase, run_supabase
 from app.utils.embeddings import embed_texts
 
-logger = get_logger("Doc-Hub.retrieval")
+logger = get_logger("dochub.retrieval")
 
 DOCUMENTS_TABLE = "documents"
 CHUNKS_TABLE = "document_chunks"

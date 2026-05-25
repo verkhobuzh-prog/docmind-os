@@ -19,7 +19,7 @@ from app.services.prompt_builder import build_system_prompt
 from app.utils.guardrails import is_query_allowed
 from app.utils.retrieval import RetrievedChunk, compress_context, get_relevant_chunks
 
-logger = get_logger("Doc-Hub.rag")
+logger = get_logger("dochub.rag")
 
 _RAG_CITATION_RULE = (
     "\n\nЦитуй фрагменти документів мітками [1], [2] — номери відповідають блокам контексту."

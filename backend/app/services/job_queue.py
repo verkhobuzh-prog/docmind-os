@@ -11,9 +11,9 @@ from app.db.redis import get_redis
 
 logger = get_logger(__name__)
 
-QUEUE_KEY = "Doc-Hub:ingestion:queue"
-PROCESSING_KEY = "Doc-Hub:ingestion:processing"
-FAILED_KEY = "Doc-Hub:ingestion:failed"
+QUEUE_KEY = "dochub:ingestion:queue"
+PROCESSING_KEY = "dochub:ingestion:processing"
+FAILED_KEY = "dochub:ingestion:failed"
 
 
 def _redis_client():

@@ -8,7 +8,7 @@ from starlette.responses import Response
 
 from app.core.logging import get_logger
 
-logger = get_logger("Doc-Hub.http")
+logger = get_logger("dochub.http")
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):

@@ -26,7 +26,7 @@ from app.db.postgres import close_postgres, init_postgres
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.request_context import RequestContextMiddleware
 
-logger = get_logger("Doc-Hub.main")
+logger = get_logger("dochub.main")
 
 
 @asynccontextmanager

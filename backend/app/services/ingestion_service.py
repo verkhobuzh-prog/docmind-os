@@ -17,7 +17,7 @@ from app.utils.chunking import chunk_text
 from app.utils.embeddings import embed_texts
 from app.utils.parsers import parse_document
 
-logger = get_logger("Doc-Hub.ingestion")
+logger = get_logger("dochub.ingestion")
 
 DOCUMENTS_TABLE = "documents"
 CHUNKS_TABLE = "document_chunks"

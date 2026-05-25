@@ -9,7 +9,7 @@ import asyncpg
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("Doc-Hub.postgres")
+logger = get_logger("dochub.postgres")
 
 _pool: Optional[asyncpg.Pool] = None
 

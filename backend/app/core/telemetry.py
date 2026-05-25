@@ -20,7 +20,7 @@ from opentelemetry.trace import Span, Status, StatusCode
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("Doc-Hub.telemetry")
+logger = get_logger("dochub.telemetry")
 
 _initialized = False
 
