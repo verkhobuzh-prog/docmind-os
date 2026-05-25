@@ -1,10 +1,10 @@
-from fastapi import FastAPI, HTTPException, Request
+﻿from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.core.logging import get_logger
 
-logger = get_logger("docmind.errors")
+logger = get_logger("Doc-Hub.errors")
 
 
 def register_exception_handlers(app: FastAPI) -> None:

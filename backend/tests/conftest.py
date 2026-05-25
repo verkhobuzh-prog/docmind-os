@@ -1,5 +1,5 @@
-"""
-Shared fixtures для всіх тестів DocMind OS.
+﻿"""
+Shared fixtures для всіх тестів Doc-Hub.
 Принцип: мокаємо зовнішні сервіси (Supabase, OpenAI),
 тестуємо власну логіку.
 """

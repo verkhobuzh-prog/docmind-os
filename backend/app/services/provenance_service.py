@@ -1,4 +1,4 @@
-"""
+﻿"""
 Провенанс сервіс з БЕЗПЕЧНИМИ параметризованими запитами.
 
 ═══════════════════════════════════════════════════════════════════════
@@ -28,7 +28,7 @@ from app.core.logging import get_logger
 from app.db.postgres import get_pool
 from app.db.supabase import get_supabase, run_supabase
 
-logger = get_logger("docmind.provenance")
+logger = get_logger("Doc-Hub.provenance")
 
 DOCUMENTS_TABLE = "documents"
 TRIPLES_TABLE = "semantic_triples"

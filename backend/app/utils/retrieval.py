@@ -1,4 +1,4 @@
-"""Hybrid retrieval: pgvector + full-text search with RLS via user_id filter."""
+﻿"""Hybrid retrieval: pgvector + full-text search with RLS via user_id filter."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from app.db.postgres import get_pool
 from app.db.supabase import get_supabase, run_supabase
 from app.utils.embeddings import embed_texts
 
-logger = get_logger("docmind.retrieval")
+logger = get_logger("Doc-Hub.retrieval")
 
 DOCUMENTS_TABLE = "documents"
 CHUNKS_TABLE = "document_chunks"

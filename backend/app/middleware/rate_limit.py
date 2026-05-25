@@ -1,5 +1,5 @@
-"""
-Redis-based Rate Limiting Middleware для DocMind OS.
+﻿"""
+Redis-based Rate Limiting Middleware для Doc-Hub.
 
 ═══════════════════════════════════════════════════════════════════════
 ВЕКТОР АТАКИ: RATE_LIMIT_PER_MINUTE оголошено в config, але не підключено
@@ -43,7 +43,7 @@ from starlette.types import ASGIApp
 
 from app.core.config import settings
 
-logger = logging.getLogger("docmind.rate_limit")
+logger = logging.getLogger("Doc-Hub.rate_limit")
 
 # ─── Конфігурація лімітів по prefix ───────────────────────────────────────────
 # Формат: (url_prefix, requests_per_minute, window_seconds)

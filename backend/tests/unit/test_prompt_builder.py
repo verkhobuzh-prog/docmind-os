@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit тести для build_system_prompt.
 Перевіряємо що промпт правильно адаптується під профіль.
 """
@@ -17,7 +17,7 @@ class TestNoProfile:
 
     def test_mentions_docmind(self):
         prompt = build_system_prompt(None)
-        assert "DocMind" in prompt
+        assert "Doc-Hub" in prompt
 
     def test_instructs_to_cite_sources(self):
         """Без профілю теж має вказувати посилатись на документи."""

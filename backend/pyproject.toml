@@ -1,7 +1,7 @@
-[project]
-name = "docmind-os-api"
+﻿[project]
+name = "doc-hub-api"
 version = "0.1.0"
-description = "DocMind OS — FastAPI backend for Enterprise AI Document SaaS"
+description = "Doc-Hub — FastAPI backend for Enterprise AI Document SaaS"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -1,4 +1,4 @@
-import time
+﻿import time
 import uuid
 from typing import Callable
 
@@ -8,7 +8,7 @@ from starlette.responses import Response
 
 from app.core.logging import get_logger
 
-logger = get_logger("docmind.http")
+logger = get_logger("Doc-Hub.http")
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):

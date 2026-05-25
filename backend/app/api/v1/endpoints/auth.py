@@ -1,4 +1,4 @@
-from typing import Annotated
+﻿from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
@@ -17,7 +17,7 @@ async def get_me(
 ) -> UserResponse:
     email = (current_user.get("email") or "").lower()
     is_admin = email in settings.pilot_admin_emails or (
-        settings.auth_disabled and email == "dev@docmind.local"
+        settings.auth_disabled and email == "dev@Doc-Hub.local"
     )
     user_id = str(current_user["id"])
     is_member = await invites_svc.is_pilot_member(user_id)

@@ -1,5 +1,5 @@
-"""
-DocMind OS — main.py після security audit fixes.
+﻿"""
+Doc-Hub — main.py після security audit fixes.
 
 Зміни відносно оригіналу:
   1. run_startup_security_checks() — перша дія в lifespan
@@ -26,7 +26,7 @@ from app.db.postgres import close_postgres, init_postgres
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.request_context import RequestContextMiddleware
 
-logger = get_logger("docmind.main")
+logger = get_logger("Doc-Hub.main")
 
 
 @asynccontextmanager
@@ -46,21 +46,21 @@ async def lifespan(app: FastAPI):
     # КРОК 2: Звичайна ініціалізація
     # ════════════════════════════════════════════════════
     logger.info(
-        "Starting DocMind OS backend (env=%s, auth_disabled=%s)",
+        "Starting Doc-Hub backend (env=%s, auth_disabled=%s)",
         settings.ENVIRONMENT,
         settings.auth_disabled,
     )
     init_supabase()
     await init_redis()
     await init_postgres()
-    logger.info("DocMind OS backend started successfully.")
+    logger.info("Doc-Hub backend started successfully.")
 
     yield
 
     # ════════════════════════════════════════════════════
     # КРОК 3: Graceful shutdown
     # ════════════════════════════════════════════════════
-    logger.info("Shutting down DocMind OS backend...")
+    logger.info("Shutting down Doc-Hub backend...")
     await close_redis()
     await close_postgres()
     close_supabase()
@@ -71,7 +71,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        description="DocMind OS — Enterprise AI Document SaaS API",
+        description="Doc-Hub — Enterprise AI Document SaaS API",
         lifespan=lifespan,
         docs_url="/docs" if not settings.is_production else None,
         redoc_url="/redoc" if not settings.is_production else None,

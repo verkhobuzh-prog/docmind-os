@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Optional
+﻿from typing import Annotated, Any, Optional
 
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -15,7 +15,7 @@ DEV_USER_ID = "00000000-0000-0000-0000-000000000001"
 def _dev_user() -> dict[str, Any]:
     return {
         "id": DEV_USER_ID,
-        "email": "dev@docmind.local",
+        "email": "dev@Doc-Hub.local",
         "role": "authenticated",
         "org_id": None,
         "app_metadata": {},
@@ -104,7 +104,7 @@ async def get_admin_user(
 ) -> dict[str, Any]:
     """Pilot admin — email must be listed in PILOT_ADMIN_EMAILS."""
     email = (current_user.get("email") or "").lower()
-    if settings.auth_disabled and email == "dev@docmind.local":
+    if settings.auth_disabled and email == "dev@Doc-Hub.local":
         return current_user
     if email not in settings.pilot_admin_emails:
         raise HTTPException(

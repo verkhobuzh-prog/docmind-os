@@ -1,4 +1,4 @@
-"""Embedding generation via OpenAI API."""
+﻿"""Embedding generation via OpenAI API."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from openai import OpenAI
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("docmind.embeddings")
+logger = get_logger("Doc-Hub.embeddings")
 
 
 async def embed_texts(texts: list[str]) -> list[list[float] | None]:

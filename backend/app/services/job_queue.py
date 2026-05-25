@@ -1,4 +1,4 @@
-"""Redis-based FIFO job queue for document ingestion."""
+﻿"""Redis-based FIFO job queue for document ingestion."""
 
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ from app.db.redis import get_redis
 
 logger = get_logger(__name__)
 
-QUEUE_KEY = "docmind:ingestion:queue"
-PROCESSING_KEY = "docmind:ingestion:processing"
-FAILED_KEY = "docmind:ingestion:failed"
+QUEUE_KEY = "Doc-Hub:ingestion:queue"
+PROCESSING_KEY = "Doc-Hub:ingestion:processing"
+FAILED_KEY = "Doc-Hub:ingestion:failed"
 
 
 def _redis_client():

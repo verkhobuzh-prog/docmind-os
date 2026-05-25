@@ -1,5 +1,5 @@
-"""
-Startup security validation для DocMind OS.
+﻿"""
+Startup security validation для Doc-Hub.
 
 Вектор атаки (AUTH_DISABLED):
 ────────────────────────────
@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.core.config import Settings
 
-logger = logging.getLogger("docmind.security.startup")
+logger = logging.getLogger("Doc-Hub.security.startup")
 
 # Оточення, де AUTH_DISABLED заборонено категорично
 _PROTECTED_ENVIRONMENTS = frozenset({

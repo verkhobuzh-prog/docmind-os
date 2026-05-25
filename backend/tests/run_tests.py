@@ -1,5 +1,5 @@
-"""
-DocMind OS — Test Runner (7 blocks)
+﻿"""
+Doc-Hub — Test Runner (7 blocks)
 Запуск: cd backend && python -m tests.run_tests
 """
 
@@ -45,7 +45,7 @@ def run(label: str, path: str, extra_args: list[str] | None = None) -> bool:
 
 def main() -> None:
     start = datetime.now()
-    print("\nDocMind OS — Запуск тестів (7 блоків)")
+    print("\nDoc-Hub — Запуск тестів (7 блоків)")
     print(f"   {start.strftime('%d.%m.%Y %H:%M')}\n")
 
     results = {name: run(label, path) for name, label, path in BLOCKS}

@@ -1,4 +1,4 @@
-"""OpenTelemetry setup. Exports OTLP/HTTP to Grafana Cloud Tempo."""
+﻿"""OpenTelemetry setup. Exports OTLP/HTTP to Grafana Cloud Tempo."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from opentelemetry.trace import Span, Status, StatusCode
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("docmind.telemetry")
+logger = get_logger("Doc-Hub.telemetry")
 
 _initialized = False
 
@@ -75,7 +75,7 @@ def init_telemetry(app) -> None:
     logger.info("OpenTelemetry initialized → %s", settings.OTEL_EXPORTER_OTLP_ENDPOINT)
 
 
-def get_tracer(name: str = "docmind"):
+def get_tracer(name: str = "Doc-Hub"):
     return trace.get_tracer(name)
 
 

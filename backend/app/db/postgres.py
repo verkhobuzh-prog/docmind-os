@@ -1,4 +1,4 @@
-"""Async PostgreSQL pool for hybrid search (pgvector + full-text)."""
+﻿"""Async PostgreSQL pool for hybrid search (pgvector + full-text)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import asyncpg
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger = get_logger("docmind.postgres")
+logger = get_logger("Doc-Hub.postgres")
 
 _pool: Optional[asyncpg.Pool] = None
 

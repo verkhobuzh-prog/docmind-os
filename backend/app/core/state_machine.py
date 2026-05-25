@@ -1,5 +1,5 @@
-"""
-Document lifecycle state machine for DocMind OS ingestion pipeline.
+﻿"""
+Document lifecycle state machine for Doc-Hub ingestion pipeline.
 
 Defines allowed states, events, and valid transitions for document processing
 from upload through indexing (or failure / retry paths).

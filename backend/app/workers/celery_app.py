@@ -1,4 +1,4 @@
-"""Celery application. Broker + result backend = Redis."""
+﻿"""Celery application. Broker + result backend = Redis."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from celery import Celery
 from app.core.config import settings
 
 celery_app = Celery(
-    "docmind",
+    "Doc-Hub",
     broker=str(settings.REDIS_URL),
     backend=str(settings.REDIS_URL),
     include=["app.workers.tasks"],

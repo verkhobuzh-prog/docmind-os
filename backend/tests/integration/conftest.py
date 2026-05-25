@@ -1,4 +1,4 @@
-"""Fixtures for integration pipeline tests."""
+﻿"""Fixtures for integration pipeline tests."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def patch_redis(monkeypatch, fake_redis: FakeRedis):
 def admin_client() -> TestClient:
     admin_user = {
         "id": DEV_USER_ID,
-        "email": "admin@docmind.local",
+        "email": "admin@Doc-Hub.local",
         "role": "authenticated",
         "org_id": None,
         "app_metadata": {"role": "admin"},

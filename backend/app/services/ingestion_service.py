@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timezone
@@ -17,7 +17,7 @@ from app.utils.chunking import chunk_text
 from app.utils.embeddings import embed_texts
 from app.utils.parsers import parse_document
 
-logger = get_logger("docmind.ingestion")
+logger = get_logger("Doc-Hub.ingestion")
 
 DOCUMENTS_TABLE = "documents"
 CHUNKS_TABLE = "document_chunks"

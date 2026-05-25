@@ -1,5 +1,5 @@
-"""
-DocMind OS — Legal Knowledge Graph Schema
+﻿"""
+Doc-Hub — Legal Knowledge Graph Schema
 FalkorDB / OpenCypher compatible
 
 Nodes:   Person, Organization, Agreement, LegalCase, Policy
@@ -148,7 +148,7 @@ class AgreementNode:
         value_amount    — сума договору (якщо є)
         currency        — ISO 4217
         org_id          — tenant isolation
-        doc_id          — UUID документа в DocMind (зв'язок з pgvector)
+        doc_id          — UUID документа в Doc-Hub (зв'язок з pgvector)
         confidence      — впевненість вилучення
     """
 
@@ -199,7 +199,7 @@ class LegalCaseNode:
         closed_date  — дата закриття
         jurisdiction — юрисдикція (країна/регіон)
         org_id       — tenant isolation
-        doc_id       — UUID документа в DocMind
+        doc_id       — UUID документа в Doc-Hub
     """
 
     id: str
@@ -249,7 +249,7 @@ class PolicyNode:
         review_date     — дата наступного перегляду
         issuing_body    — хто випустив (організація або орган влади)
         org_id          — tenant isolation
-        doc_id          — UUID документа в DocMind
+        doc_id          — UUID документа в Doc-Hub
     """
 
     id: str

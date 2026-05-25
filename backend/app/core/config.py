@@ -1,4 +1,4 @@
-from functools import lru_cache
+﻿from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, PostgresDsn, RedisDsn
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     )
 
     # App
-    APP_NAME: str = "DocMind OS"
+    APP_NAME: str = "Doc-Hub"
     APP_VERSION: str = "0.1.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
     API_DEBUG: bool = False
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     SUPABASE_SIGNED_URL_EXPIRES: int = Field(default=3600, ge=60, le=604800)
 
     # Database (local postgres OR Supabase connection string)
-    DATABASE_URL: PostgresDsn | str = "postgresql://docmind:docmind@localhost:5432/docmind"
+    DATABASE_URL: PostgresDsn | str = "postgresql://Doc-Hub:Doc-Hub@localhost:5432/Doc-Hub"
 
     # Redis
     REDIS_URL: RedisDsn | str = "redis://localhost:6379/0"

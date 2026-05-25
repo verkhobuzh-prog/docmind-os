@@ -1,1 +1,1 @@
-"""DocMind OS FastAPI application package."""
+﻿"""Doc-Hub FastAPI application package."""

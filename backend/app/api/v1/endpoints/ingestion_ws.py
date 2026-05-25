@@ -1,4 +1,4 @@
-"""WebSocket endpoint — real-time ingestion progress for Documents UI."""
+﻿"""WebSocket endpoint — real-time ingestion progress for Documents UI."""
 
 from __future__ import annotations
 
@@ -135,7 +135,7 @@ async def _resolve_ws_user(token: str | None) -> dict[str, Any] | None:
     if settings.auth_disabled:
         return {
             "id": DEV_USER_ID,
-            "email": "dev@docmind.local",
+            "email": "dev@Doc-Hub.local",
             "role": "authenticated",
         }
 

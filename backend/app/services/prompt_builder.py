@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 from app.schemas.profile import ProfileRead
 
 
@@ -71,7 +71,7 @@ STYLE_INSTRUCTIONS = {
 def build_system_prompt(profile: ProfileRead | None) -> str:
     if profile is None:
         return (
-            "Ти AI-помічник для роботи з документами DocMind OS. "
+            "Ти AI-помічник для роботи з документами Doc-Hub. "
             "Відповідай українською мовою. "
             "Посилайся лише на надані документи. "
             "Якщо відповідь відсутня в документах — скажи про це."
@@ -91,7 +91,7 @@ def build_system_prompt(profile: ProfileRead | None) -> str:
         forbidden = f"\nНЕ відповідай на питання про: {topics}."
 
     return (
-        f"Ти AI-помічник DocMind OS. Профіль: '{profile.name}'.\n\n"
+        f"Ти AI-помічник Doc-Hub. Профіль: '{profile.name}'.\n\n"
         f"РІВЕНЬ СКЛАДНОСТІ ({profile.complexity_level}/5): {complexity}\n\n"
         f"ГАЛУЗЬ ({profile.domain}): {domain}\n\n"
         f"СТИЛЬ ВІДПОВІДІ: {style}\n\n"

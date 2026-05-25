@@ -1,4 +1,4 @@
-"""DocMind OS V12.5 base ontology — entity types, relations, triples, and provenance.
+﻿"""Doc-Hub V12.5 base ontology — entity types, relations, triples, and provenance.
 
 Defines the canonical vocabulary for knowledge extraction, graph storage, and
 audit trails. All types are stdlib-only (dataclasses + enums) so they can be
@@ -20,7 +20,7 @@ __all__ = [
 
 
 class EntityType(str, Enum):
-    """Node labels in the DocMind knowledge graph."""
+    """Node labels in the Doc-Hub knowledge graph."""
 
     PERSON = "PERSON"
     ORGANIZATION = "ORGANIZATION"
@@ -35,7 +35,7 @@ class EntityType(str, Enum):
 
 
 class RelationType(str, Enum):
-    """Edge types between entities in the DocMind knowledge graph."""
+    """Edge types between entities in the Doc-Hub knowledge graph."""
 
     SIGNED_BY = "SIGNED_BY"
     REFERENCES = "REFERENCES"
