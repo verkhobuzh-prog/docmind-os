@@ -34,14 +34,14 @@ class Settings(BaseSettings):
     SUPABASE_SIGNED_URL_EXPIRES: int = Field(default=3600, ge=60, le=604800)
 
     # Database (local postgres OR Supabase connection string)
-    DATABASE_URL: PostgresDsn | str = "postgresql://Doc-Hub:Doc-Hub@localhost:5432/Doc-Hub"
+    DATABASE_URL: PostgresDsn | str = "postgresql://dochub:dochub@localhost:5432/dochub"
 
     # Redis
     REDIS_URL: RedisDsn | str = "redis://localhost:6379/0"
 
     # Graph DB
     GRAPH_DB_URL: str = "redis://localhost:6380"
-    GRAPH_DB_NAME: str = "docmind_knowledge"
+    GRAPH_DB_NAME: str = "dochub_knowledge"
     GRAPH_DB_ENABLED: bool = False
 
     # Observability (OpenTelemetry → Grafana Cloud Tempo)

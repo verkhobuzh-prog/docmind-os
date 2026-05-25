@@ -1,4 +1,4 @@
-# Kubernetes Topology — DocMind OS (Production)
+# Kubernetes Topology — Doc-Hub (Production)
 
 ## Cluster layout
 
@@ -8,24 +8,24 @@ flowchart TB
         CF[Cloudflare CDN/WAF]
     end
 
-    subgraph K8s["EKS / GKE — docmind-prod"]
+    subgraph K8s["EKS / GKE — dochub-prod"]
         subgraph ingress_ns["namespace: ingress"]
             IG[Ingress NGINX / Gateway API]
         end
 
-        subgraph app_ns["namespace: docmind-app"]
+        subgraph app_ns["namespace: dochub-app"]
             API[Deployment: api<br/>HPA 3-20]
             WEB[Deployment: web<br/>HPA 2-10]
             ROUTER[Deployment: llm-router<br/>HPA 2-8]
         end
 
-        subgraph worker_ns["namespace: docmind-workers"]
+        subgraph worker_ns["namespace: dochub-workers"]
             W1[Deployment: ingestion-worker]
             W2[Deployment: embedding-worker]
             TEMP[Temporal frontend/matching]
         end
 
-        subgraph data_ns["namespace: docmind-data"]
+        subgraph data_ns["namespace: dochub-data"]
             REDIS[Redis Sentinel / Elasticache endpoint]
         end
     end
@@ -54,7 +54,7 @@ flowchart TB
 ## Helm chart structure
 
 ```
-infra/helm/docmind/
+infra/helm/dochub/
 ├── Chart.yaml
 ├── values.yaml
 ├── values-staging.yaml
@@ -91,9 +91,9 @@ infra/helm/docmind/
 
 ```
 apps/
-├── docmind-api      → infra/helm/docmind (path: api)
-├── docmind-web      → infra/helm/docmind (path: web)
-└── docmind-workers  → infra/helm/docmind (path: workers)
+├── dochub-api      → infra/helm/dochub (path: api)
+├── dochub-web      → infra/helm/dochub (path: web)
+└── dochub-workers  → infra/helm/dochub (path: workers)
 ```
 
 Secrets: AWS Secrets Manager → External Secrets → K8s Secret.

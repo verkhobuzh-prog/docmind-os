@@ -1,4 +1,4 @@
-# AI Pipeline — DocMind OS
+# AI Pipeline — Doc-Hub
 
 ## End-to-end flow
 

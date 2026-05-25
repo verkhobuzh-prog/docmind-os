@@ -32,7 +32,7 @@ export function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface-0 p-4 dark:bg-surface-dark-0">
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create account</h1>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Start using DocMind OS</p>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Start using Doc-Hub</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

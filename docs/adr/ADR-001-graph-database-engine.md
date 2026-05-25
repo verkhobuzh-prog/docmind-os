@@ -1,4 +1,4 @@
-# ADR-001: Graph Database Engine для DocMind OS
+# ADR-001: Graph Database Engine для Doc-Hub
 
 **Status:** ACCEPTED  
 **Date:** 2026-05-25  
@@ -10,7 +10,7 @@ temporal knowledge graph, legal reasoning, provenance chains.
 
 ## 1. Контекст і проблема
 
-DocMind OS V12.5 потребує Graph DB для:
+Doc-Hub V12.5 потребує Graph DB для:
 
 - Зберігання юридичних сутностей (Person, Org, Agreement, LegalCase, Policy)
 - Temporal edges (`valid_from` / `valid_to`) для реконструкції стану на дату
@@ -70,7 +70,7 @@ DocMind OS V12.5 потребує Graph DB для:
 - ✅ Безкоштовно для internal use, research, development
 - ✅ Self-hosted production — OK
 - ⚠️ Заборонено: продавати FalkorDB як окремий cloud database service
-- DocMind OS використовує FalkorDB як **компонент**, не перепродає DB → **SAFE**
+- Doc-Hub використовує FalkorDB як **компонент**, не перепродає DB → **SAFE**
 
 **Neo4j Community** — GPL v3:
 
@@ -137,7 +137,7 @@ async with driver.session() as session:
     result = await session.run("MATCH (n:Agreement) RETURN n LIMIT 10")
 ```
 
-Обидва — async-ready, офіційно підтримувані. DocMind backend використовує `app/db/graph.py` (FalkorDB sync + `asyncio.to_thread`).
+Обидва — async-ready, офіційно підтримувані. Doc-Hub backend використовує `app/db/graph.py` (FalkorDB sync + `asyncio.to_thread`).
 
 ### 4.5 Docker Footprint
 
@@ -251,7 +251,7 @@ GRAPH_DB_ENABLED=true
 GRAPH_DB_HOST=localhost
 GRAPH_DB_PORT=6380
 GRAPH_DB_URL=redis://localhost:6380
-GRAPH_DB_NAME=docmind_knowledge
+GRAPH_DB_NAME=dochub_knowledge
 ```
 
 ```yaml

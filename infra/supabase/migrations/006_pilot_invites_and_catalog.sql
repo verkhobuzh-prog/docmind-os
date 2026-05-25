@@ -1,4 +1,4 @@
--- DocMind OS — Personal pilot: invites, members, document catalog fields
+-- Doc-Hub — Personal pilot: invites, members, document catalog fields
 
 -- ─── Invite codes ───────────────────────────────────────────────────────────
 create table if not exists public.invite_codes (

@@ -1,4 +1,4 @@
-# DocMind OS — Cursor rules (Phase 1)
+# Doc-Hub — Cursor rules (Phase 1)
 
 - Docs: `docs/DEVELOPER_PASSPORT.md` (onboarding), `docs/ARCHITECTURAL_PASSPORT.md` (architecture)
 - Stack: FastAPI + Supabase + React (Vite, TypeScript)

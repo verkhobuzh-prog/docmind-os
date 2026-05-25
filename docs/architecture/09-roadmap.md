@@ -1,4 +1,4 @@
-# Development Roadmap — DocMind OS
+# Development Roadmap — Doc-Hub
 
 ## Phase 1 — MVP (Q2 2026)
 

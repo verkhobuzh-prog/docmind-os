@@ -1,4 +1,4 @@
-# RBAC + ABAC — DocMind OS
+# RBAC + ABAC — Doc-Hub
 
 ## Role hierarchy
 

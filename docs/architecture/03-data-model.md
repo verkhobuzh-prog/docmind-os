@@ -1,4 +1,4 @@
-# Data Model — DocMind OS
+# Data Model — Doc-Hub
 
 ## ERD (Phase 1–2 core)
 

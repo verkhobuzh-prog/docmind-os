@@ -1,6 +1,6 @@
 # Phase 1 MVP — Completion Report
 
-**Project:** DocMind OS (DocumentOS)  
+**Project:** Doc-Hub (DocumentOS)  
 **Status:** ✅ **Phase 1 Completed**  
 **Date:** May 2026  
 **Tests:** 9/9 passed (`pytest -v`)

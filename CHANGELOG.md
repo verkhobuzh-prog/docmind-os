@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DocMind OS are documented in this file.
+All notable changes to Doc-Hub are documented in this file.
 
 ## [0.1.0] - 2026-05-17 — Phase 1 MVP ✅
 

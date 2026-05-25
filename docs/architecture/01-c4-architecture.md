@@ -1,27 +1,27 @@
-# C4 Architecture — DocMind OS
+# C4 Architecture — Doc-Hub
 
 ## Level 1: System Context
 
 ```mermaid
 C4Context
-    title System Context — DocMind OS
+    title System Context — Doc-Hub
 
     Person(user, "User", "Analyst, lawyer, ops team member")
     Person(admin, "Org Admin", "Manages workspace, billing, RBAC")
-    System(docmind, "DocMind OS", "AI Document Platform")
+    System(dochub, "Doc-Hub", "AI Document Platform")
     System_Ext(supabase, "Supabase", "Auth, PostgreSQL, Storage, pgvector")
     System_Ext(llm, "LLM Providers", "OpenAI, Anthropic, Google, local vLLM")
     System_Ext(stripe, "Stripe", "Billing")
     System_Ext(storage, "Object Storage", "S3 / MinIO / Supabase Storage")
     System_Ext(integrations, "Integrations", "Google Drive, Notion, SharePoint")
 
-    Rel(user, docmind, "Upload, search, chat with documents")
-    Rel(admin, docmind, "Manage org, permissions, billing")
-    Rel(docmind, supabase, "Auth, data, vectors")
-    Rel(docmind, llm, "Embeddings, generation, rerank")
-    Rel(docmind, stripe, "Subscriptions, usage billing")
-    Rel(docmind, storage, "Raw files, parsed artifacts")
-    Rel(docmind, integrations, "Sync external sources")
+    Rel(user, dochub, "Upload, search, chat with documents")
+    Rel(admin, dochub, "Manage org, permissions, billing")
+    Rel(dochub, supabase, "Auth, data, vectors")
+    Rel(dochub, llm, "Embeddings, generation, rerank")
+    Rel(dochub, stripe, "Subscriptions, usage billing")
+    Rel(dochub, storage, "Raw files, parsed artifacts")
+    Rel(dochub, integrations, "Sync external sources")
 ```
 
 | Actor | Interaction |
@@ -36,11 +36,11 @@ C4Context
 
 ```mermaid
 C4Container
-    title Containers — DocMind OS
+    title Containers — Doc-Hub
 
     Person(user, "User")
 
-    Container_Boundary(docmind, "DocMind Platform") {
+    Container_Boundary(dochub, "Doc-Hub Platform") {
         Container(web, "Web App", "React 19, TS, TanStack Query", "SPA + SSR shell")
         Container(api, "API Gateway", "FastAPI", "REST, auth, orchestration")
         Container(workers, "Workers", "Python + Temporal", "Ingestion, embeddings, indexing")

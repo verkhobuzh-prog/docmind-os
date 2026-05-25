@@ -1,8 +1,8 @@
-# Паспорт розробника — DocMind OS
+# Паспорт розробника — Doc-Hub
 
 | Поле | Значення |
 |------|----------|
-| **Проект** | DocMind OS (DocumentOS) |
+| **Проект** | Doc-Hub (DocumentOS) |
 | **Версія** | 0.1.0 (Phase 1 MVP) |
 | **Аудиторія** | Backend / Full-stack розробники |
 | **Пов’язаний документ** | [ARCHITECTURAL_PASSPORT.md](./ARCHITECTURAL_PASSPORT.md) |
@@ -23,8 +23,8 @@
 ### 1.2 Клонування та налаштування
 
 ```bash
-git clone https://github.com/verkhobuzh-prog/docmind-os.git
-cd docmind-os
+git clone https://github.com/verkhobuzh-prog/doc-hub.git
+cd doc-hub
 cp .env.example .env
 ```
 
@@ -47,7 +47,7 @@ docker compose up --build backend postgres redis
 |-----|-------------|
 | http://localhost:8000/docs | Swagger UI |
 | http://localhost:8000/health | Health check |
-| localhost:5432 | PostgreSQL (docmind/docmind) |
+| localhost:5432 | PostgreSQL (dochub/dochub) |
 | localhost:6379 | Redis |
 
 ### 1.4 Локальний запуск (без Docker)
@@ -83,7 +83,7 @@ curl http://localhost:8000/health
 ## 2. Структура проекту (де що лежить)
 
 ```
-docmind-os/
+doc-hub/
 ├── backend/                         # ← основна робота Phase 1
 │   ├── app/
 │   │   ├── main.py                  # FastAPI factory, lifespan, /health
@@ -234,7 +234,7 @@ curl -N -X POST "http://localhost:8000/api/v1/chat" \
 | `SUPABASE_URL` | Так* | URL проекту Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Так* | Server-side key (не в frontend!) |
 | `OPENAI_API_KEY` | Для AI | Embeddings + chat |
-| `DATABASE_URL` | Docker | `postgresql://docmind:docmind@localhost:5432/docmind` |
+| `DATABASE_URL` | Docker | `postgresql://dochub:dochub@localhost:5432/dochub` |
 | `REDIS_URL` | Docker | `redis://localhost:6379/0` |
 | `AUTH_DISABLED` | Ні | `true` — dev без JWT |
 | `INGESTION_AUTO_START` | Ні | `true` — ingest після upload |
@@ -435,7 +435,7 @@ http://localhost:8000/docs → **Authorize** → вставте `Bearer <jwt>` (
 docker compose ps postgres
 
 # Перевірка pgvector
-docker exec -it docmind-postgres psql -U docmind -d docmind -c "\dx"
+docker exec -it dochub-postgres psql -U dochub -d dochub -c "\dx"
 ```
 
 ---

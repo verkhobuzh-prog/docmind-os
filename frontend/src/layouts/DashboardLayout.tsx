@@ -66,7 +66,7 @@ export function DashboardLayout({ me }: { me: MeResponse | null }) {
             <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
               <FileText className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-gray-900 dark:text-white text-sm">DocMind OS</span>
+            <span className="font-semibold text-gray-900 dark:text-white text-sm">Doc-Hub</span>
           </div>
           <ThemeToggle />
         </div>
@@ -133,7 +133,7 @@ export function DashboardLayout({ me }: { me: MeResponse | null }) {
           <button onClick={() => setSidebarOpen(true)} className="btn-ghost p-2" type="button">
             <Menu className="w-5 h-5" />
           </button>
-          <span className="font-semibold text-sm text-gray-900 dark:text-white flex-1">DocMind OS</span>
+          <span className="font-semibold text-sm text-gray-900 dark:text-white flex-1">Doc-Hub</span>
           <ThemeToggle />
         </div>
 

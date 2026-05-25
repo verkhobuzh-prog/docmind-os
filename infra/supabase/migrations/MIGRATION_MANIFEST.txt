@@ -1,4 +1,4 @@
-# DocMind OS Migration Manifest
+# Doc-Hub Migration Manifest
 # Generated: 2026-05-25T05:32:45.955595+00:00
 # Format: prefix|filename|sha256_prefix
 #

@@ -1,4 +1,4 @@
-# DocMind OS — Platform Architecture
+# Doc-Hub — Platform Architecture
 
 ## Phase 1 Status: ✅ **COMPLETED** (May 2026)
 

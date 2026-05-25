@@ -1,4 +1,4 @@
--- DocMind OS — Knowledge graph metadata (semantic triples audit / provenance)
+-- Doc-Hub — Knowledge graph metadata (semantic triples audit / provenance)
 
 CREATE TABLE IF NOT EXISTS public.semantic_triples (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),

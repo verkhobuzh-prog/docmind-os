@@ -71,6 +71,6 @@ export const useProfileStore = create<ProfileState>()(
         }))
       },
     }),
-    { name: 'docmind-profiles', partialize: (s) => ({ activeProfile: s.activeProfile }) }
+    { name: 'dochub-profiles', partialize: (s) => ({ activeProfile: s.activeProfile }) }
   )
 )

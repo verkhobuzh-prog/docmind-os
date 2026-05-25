@@ -1,4 +1,4 @@
-# DocMind OS (DocumentOS)
+# Doc-Hub (DocumentOS)
 
 Enterprise AI Document SaaS - upload, parse, search, and chat with citations.
 
@@ -6,13 +6,13 @@ Enterprise AI Document SaaS - upload, parse, search, and chat with citations.
 |-------|--------|
 | Phase 1 | Complete - FastAPI backend, RAG, Docker |
 | Phase 2 | Complete - React frontend (Vite + Tailwind) |
-| Repository | https://github.com/verkhobuzh-prog/docmind-os |
+| Repository | https://github.com/verkhobuzh-prog/doc-hub |
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/verkhobuzh-prog/docmind-os.git
-cd docmind-os
+git clone https://github.com/verkhobuzh-prog/doc-hub.git
+cd doc-hub
 cp .env.example .env
 docker compose up --build
 ```

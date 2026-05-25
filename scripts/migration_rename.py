@@ -70,7 +70,7 @@ def check_for_duplicates(migrations: list[Path]) -> list[tuple[str, list[Path]]]
 
 def generate_manifest(migrations: list[Path]) -> str:
     lines = [
-        "# DocMind OS Migration Manifest",
+        "# Doc-Hub Migration Manifest",
         f"# Generated: {datetime.now(timezone.utc).isoformat()}",
         "# Format: prefix|filename|sha256_prefix",
         "#",
@@ -206,7 +206,7 @@ def ci_check(migrations_dir: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="DocMind OS migration management tool")
+    parser = argparse.ArgumentParser(description="Doc-Hub migration management tool")
     parser.add_argument(
         "command",
         choices=["check", "rename", "ci"],

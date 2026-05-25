@@ -1,4 +1,4 @@
-# Resilience Strategy — DocMind OS
+# Resilience Strategy — Doc-Hub
 
 ## Multi-layer defense
 

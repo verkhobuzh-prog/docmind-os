@@ -32,7 +32,7 @@ export function AppLayout() {
     <div className="flex min-h-screen bg-surface">
       <aside className="flex w-64 flex-col border-r border-slate-700/50 bg-surface-raised">
         <div className="border-b border-slate-700/50 p-5">
-          <h1 className="text-lg font-bold text-white">DocMind OS</h1>
+          <h1 className="text-lg font-bold text-white">Doc-Hub</h1>
           <p className="mt-1 text-xs text-slate-400">Enterprise Document AI</p>
         </div>
 

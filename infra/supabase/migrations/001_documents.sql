@@ -1,4 +1,4 @@
--- DocMind OS — Phase 1: documents table + storage metadata + RLS
+-- Doc-Hub — Phase 1: documents table + storage metadata + RLS
 -- Run on Supabase (production) or local Postgres (dev via Docker)
 
 create extension if not exists "uuid-ossp";

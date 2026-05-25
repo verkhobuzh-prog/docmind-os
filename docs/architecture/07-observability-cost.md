@@ -1,4 +1,4 @@
-# Observability & Cost — DocMind OS
+# Observability & Cost — Doc-Hub
 
 ## OpenTelemetry stack
 

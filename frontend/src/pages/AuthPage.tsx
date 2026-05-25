@@ -63,7 +63,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
           <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
             <FileText className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-semibold text-gray-900 dark:text-white">DocMind OS</span>
+          <span className="text-xl font-semibold text-gray-900 dark:text-white">Doc-Hub</span>
         </div>
 
         <div className="card p-8">

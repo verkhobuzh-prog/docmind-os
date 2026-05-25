@@ -1,4 +1,4 @@
-# DocMind OS — Architecture
+# Doc-Hub — Architecture
 
 > **Повний архітектурний паспорт:** [ARCHITECTURAL_PASSPORT.md](./ARCHITECTURAL_PASSPORT.md)
 

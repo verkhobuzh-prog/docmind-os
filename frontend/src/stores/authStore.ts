@@ -62,6 +62,6 @@ export const useAuthStore = create<AuthState>()(
         }
       },
     }),
-    { name: 'docmind-auth', partialize: (s) => ({ user: s.user, token: s.token }) }
+    { name: 'dochub-auth', partialize: (s) => ({ user: s.user, token: s.token }) }
   )
 )

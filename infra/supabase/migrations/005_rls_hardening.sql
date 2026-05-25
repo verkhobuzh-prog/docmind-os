@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- DocMind OS — Migration 004: RLS Hardening (CRITICAL Security Fix)
+-- Doc-Hub — Migration 004: RLS Hardening (CRITICAL Security Fix)
 -- Вектор атаки: backend використовує service_role → RLS ігнорується.
 -- Якщо в сервісному коді забути .eq("user_id", uid) — будь-який
 -- авторизований користувач читає документи ВСІХ інших (IDOR).

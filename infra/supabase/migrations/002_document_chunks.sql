@@ -1,4 +1,4 @@
--- DocMind OS — Phase 1.5: organizations, workspaces, chunks, AI logs
+-- Doc-Hub — Phase 1.5: organizations, workspaces, chunks, AI logs
 -- documents table is defined in 001_documents.sql
 
 create extension if not exists vector;

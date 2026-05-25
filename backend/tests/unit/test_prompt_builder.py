@@ -15,7 +15,7 @@ class TestNoProfile:
         assert isinstance(prompt, str)
         assert len(prompt) > 50
 
-    def test_mentions_docmind(self):
+    def test_mentions_dochub(self):
         prompt = build_system_prompt(None)
         assert "Doc-Hub" in prompt
 

@@ -10,7 +10,7 @@ Usage:
     from app.db.graph_schema import LegalGraphSchema
     from app.db.graph import get_graph
 
-    graph = get_graph("docmind_knowledge")
+    graph = get_graph("dochub_knowledge")
     schema = LegalGraphSchema(graph)
     await schema.initialize()
 """

@@ -28,7 +28,7 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface-0 p-4 dark:bg-surface-dark-0">
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Sign in</h1>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">DocMind OS — Enterprise Document AI</p>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Doc-Hub — Enterprise Document AI</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />

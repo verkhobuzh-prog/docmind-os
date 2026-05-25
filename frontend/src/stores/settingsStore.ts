@@ -29,7 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       setBlockSensitiveUploads: (blockSensitiveUploads) => set({ blockSensitiveUploads }),
     }),
-    { name: "docmind-settings" }
+    { name: "dochub-settings" }
   )
 );
 

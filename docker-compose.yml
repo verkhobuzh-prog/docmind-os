@@ -1,4 +1,4 @@
-# DocMind OS — повна конфігурація з пінованою FalkorDB
+# Doc-Hub — повна конфігурація з пінованою FalkorDB
 # ADR-001: FalkorDB обрано над Neo4j
 # docs/adr/ADR-001-graph-database-engine.md
 #
@@ -10,30 +10,30 @@
 version: "3.9"
 
 networks:
-  docmind_net:
+  dochub_net:
     driver: bridge
-    name: docmind_net
+    name: dochub_net
 
 volumes:
   postgres_data:
-    name: docmind_postgres_data
+    name: dochub_postgres_data
   redis_data:
-    name: docmind_redis_data
+    name: dochub_redis_data
   falkordb_data:
-    name: docmind_falkordb_data
+    name: dochub_falkordb_data
   backend_cache:
-    name: docmind_backend_cache
+    name: dochub_backend_cache
 
 services:
   # ── POSTGRESQL + pgvector (vector RAG) ───────────────────────────────────
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: docmind-postgres
+    container_name: dochub-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-docmind}
-      POSTGRES_USER: ${POSTGRES_USER:-docmind}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docmind}
+      POSTGRES_DB: ${POSTGRES_DB:-dochub}
+      POSTGRES_USER: ${POSTGRES_USER:-dochub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dochub}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -43,23 +43,23 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-docmind} -d ${POSTGRES_DB:-docmind}",
+          "pg_isready -U ${POSTGRES_USER:-dochub} -d ${POSTGRES_DB:-dochub}",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
     networks:
-      - docmind_net
+      - dochub_net
 
   # ── REDIS (cache + rate limiting) ────────────────────────────────────────
   redis:
     image: redis:7.2-alpine
-    container_name: docmind-redis
+    container_name: dochub-redis
     restart: unless-stopped
     command: >
       redis-server
-      --requirepass ${REDIS_PASSWORD:-docmind_redis_secret}
+      --requirepass ${REDIS_PASSWORD:-dochub_redis_secret}
       --appendonly yes
       --appendfilename redis.aof
       --maxmemory ${REDIS_MAX_MEMORY:-256mb}
@@ -74,7 +74,7 @@ services:
           "CMD",
           "redis-cli",
           "-a",
-          "${REDIS_PASSWORD:-docmind_redis_secret}",
+          "${REDIS_PASSWORD:-dochub_redis_secret}",
           "ping",
         ]
       interval: 10s
@@ -82,16 +82,16 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - docmind_net
+      - dochub_net
 
   # ── FALKORDB (Knowledge Graph — Legal Domain) ────────────────────────────
   falkordb:
     image: falkordb/falkordb:v4.18.6
-    container_name: docmind-falkordb
+    container_name: dochub-falkordb
     restart: unless-stopped
     environment:
       REDIS_ARGS: >-
-        --requirepass ${FALKORDB_PASSWORD:-docmind_graph_secret}
+        --requirepass ${FALKORDB_PASSWORD:-dochub_graph_secret}
         --appendonly yes
         --appendfilename falkordb.aof
       FALKORDB_MAX_QUEUED_QUERIES: ${FALKORDB_MAX_QUEUED_QUERIES:-25}
@@ -105,7 +105,7 @@ services:
         - CMD-SHELL
         - >
           redis-cli -p 6379
-          -a "${FALKORDB_PASSWORD:-docmind_graph_secret}"
+          -a "${FALKORDB_PASSWORD:-dochub_graph_secret}"
           --no-auth-warning
           GRAPH.QUERY health_check "RETURN 1"
           | grep -q "1" || exit 1
@@ -117,7 +117,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docmind_net
+      - dochub_net
 
   # ── BACKEND (FastAPI) ────────────────────────────────────────────────────
   backend:
@@ -125,18 +125,18 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: development
-    container_name: docmind-backend
+    container_name: dochub-backend
     restart: unless-stopped
     env_file:
       - .env
     environment:
       API_HOST: 0.0.0.0
       API_PORT: 8000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-docmind}:${POSTGRES_PASSWORD:-docmind}@postgres:5432/${POSTGRES_DB:-docmind}
-      REDIS_URL: redis://:${REDIS_PASSWORD:-docmind_redis_secret}@redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-dochub}:${POSTGRES_PASSWORD:-dochub}@postgres:5432/${POSTGRES_DB:-dochub}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-dochub_redis_secret}@redis:6379/0
       GRAPH_DB_ENABLED: ${GRAPH_DB_ENABLED:-true}
-      GRAPH_DB_URL: redis://:${FALKORDB_PASSWORD:-docmind_graph_secret}@falkordb:6379
-      GRAPH_DB_NAME: ${GRAPH_DB_NAME:-docmind_knowledge}
+      GRAPH_DB_URL: redis://:${FALKORDB_PASSWORD:-dochub_graph_secret}@falkordb:6379
+      GRAPH_DB_NAME: ${GRAPH_DB_NAME:-dochub_knowledge}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_JSON: ${LOG_JSON:-false}
@@ -168,7 +168,7 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - docmind_net
+      - dochub_net
 
   # ── FRONTEND (React + Vite) ──────────────────────────────────────────────
   frontend:
@@ -176,7 +176,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
-    container_name: docmind-frontend
+    container_name: dochub-frontend
     restart: unless-stopped
     env_file:
       - .env
@@ -193,4 +193,4 @@ services:
       backend:
         condition: service_healthy
     networks:
-      - docmind_net
+      - dochub_net

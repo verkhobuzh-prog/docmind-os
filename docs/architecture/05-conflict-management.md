@@ -1,4 +1,4 @@
-# Conflict Management — DocMind OS
+# Conflict Management — Doc-Hub
 
 ## Conflict types
 
